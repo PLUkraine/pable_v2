@@ -12,3 +12,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::doTimes(GraphLib::Id times)
+{
+    Q_UNUSED(times)
+}

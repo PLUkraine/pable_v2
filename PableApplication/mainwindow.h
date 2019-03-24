@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "node.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -14,6 +16,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void doTimes(GraphLib::Id times);
 
 private:
     Ui::MainWindow *ui;
