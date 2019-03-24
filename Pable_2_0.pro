@@ -6,5 +6,8 @@ SUBDIRS += \
 
 # CONFIG += ordered
 
+PableApplication.file = PableApplication/PableApplication.pro
+GraphLib.file = GraphLib/GraphLib.pro
+
 # what subproject depends on others
-# CONTROLLER.depends = VIEW MODEL
+PableApplication.depends = GraphLib

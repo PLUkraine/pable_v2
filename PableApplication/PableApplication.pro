@@ -22,7 +22,7 @@ FORMS += \
         mainwindow.ui
 
 INCLUDEPATH += ../GraphLib
-LIBS += -L../GraphLib/debug -lGraphLib
+LIBS += -L../GraphLib -lGraphLib
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
