@@ -10,10 +10,12 @@ include(../common.pri)
 INCLUDEPATH += ./
 SOURCES += \
         mainwindow.cpp\
-        main.cpp
+        main.cpp \
+    spreadsheetmodel.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    spreadsheetmodel.h
 
 FORMS += \
         mainwindow.ui

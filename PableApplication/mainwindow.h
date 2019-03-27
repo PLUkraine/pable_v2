@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "node.h"
+#include "spreadsheetmodel.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,10 +17,10 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void doTimes(GraphLib::Id times);
-
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *mUi;
+
+    SpreadsheetModel *mTableModel;
 };
 
 #endif // MAINWINDOW_H

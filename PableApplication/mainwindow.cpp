@@ -3,17 +3,15 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    mUi(new Ui::MainWindow),
+    mTableModel(new SpreadsheetModel(this))
 {
-    ui->setupUi(this);
+    mUi->setupUi(this);
+    mUi->mainTableView->setModel(mTableModel);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete mUi;
 }
 
-void MainWindow::doTimes(GraphLib::Id times)
-{
-    Q_UNUSED(times)
-}
