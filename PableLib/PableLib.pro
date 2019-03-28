@@ -5,6 +5,8 @@ include(../common.pri)
 
 # Input
 SOURCES += \
-    cellindex.cpp
+    cellindex.cpp \
+    token.cpp
 HEADERS += \
-    cellindex.h
+    cellindex.h \
+    token.h
