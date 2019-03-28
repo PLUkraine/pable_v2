@@ -6,7 +6,13 @@ include(../common.pri)
 # Input
 SOURCES += \
     cellindex.cpp \
-    token.cpp
+    Token/token.cpp \
+    tokenizer.cpp \
+    Token/literal.cpp \
+    Token/operator.cpp
 HEADERS += \
     cellindex.h \
-    token.h
+    Token/token.h \
+    tokenizer.h \
+    Token/literal.h \
+    Token/operator.h

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <QList>
-class QString;
+#include <memory>
 
-void compareQLists(const QList<QString> &l1, const QList<QString> &l2);
+#include "Token/token.h"
+
+
+void compareTokenLists(const QList<std::shared_ptr<Pable::Tokens::Token>> &l1,
+                       const QList<std::shared_ptr<Pable::Tokens::Token>> &l2);

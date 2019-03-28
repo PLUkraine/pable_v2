@@ -1,5 +1,8 @@
-#include "token.h"
-#include <exception>
+#include "tokenizer.h"
+
+#include "Token/literal.h"
+#include "Token/operator.h"
+
 
 namespace Pable {
 
@@ -7,11 +10,11 @@ enum class TokenizerState {
     Number, Whitespace
 };
 
-QList<QString> Tokenizer::tokenize(const QString &exp) const
+QList<std::shared_ptr<Tokens::Token> > Tokenizer::tokenize(const QString &exp) const
 {
     int numSoFar = 0;
     TokenizerState state = TokenizerState::Whitespace;
-    QList<QString> answer;
+    QList<std::shared_ptr<Tokens::Token> > answer;
 
     for (int i=0; i<exp.length(); ++i) {
         QChar c = exp[i];
@@ -22,13 +25,14 @@ QList<QString> Tokenizer::tokenize(const QString &exp) const
         }
         else {
             if (state == TokenizerState::Number) {
-                answer << QString::number(numSoFar);
+                answer << std::make_shared<Tokens::Literal>(numSoFar);
                 numSoFar = 0;
                 state = TokenizerState::Whitespace;
             }
 
             if (isOp(c.toLatin1())) {
-                answer << QString(c);
+                auto op = c == '+' ? Tokens::plusOp : Tokens::minusOp;
+                answer << std::make_shared<Tokens::Operator>(op);
             }
             else if (!c.isSpace()){
                 QString message = "Unknown char: %1";
@@ -38,7 +42,7 @@ QList<QString> Tokenizer::tokenize(const QString &exp) const
     }
 
     if (state == TokenizerState::Number) {
-        answer << QString::number(numSoFar);
+        answer << std::make_shared<Tokens::Literal>(numSoFar);
     }
 
     return answer;
@@ -49,4 +53,4 @@ bool Tokenizer::isOp(char c) const
     return c == '+' || c == '-';
 }
 
-}
+} // namespace Pable
