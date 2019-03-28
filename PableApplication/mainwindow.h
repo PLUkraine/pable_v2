@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -22,5 +21,3 @@ private:
 
     SpreadsheetModel *mTableModel;
 };
-
-#endif // MAINWINDOW_H

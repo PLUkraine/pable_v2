@@ -2,12 +2,14 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     PableApplication\
-    GraphLib
+    PableLib \
+    PableTests
 
 # CONFIG += ordered
 
 PableApplication.file = PableApplication/PableApplication.pro
-GraphLib.file = GraphLib/GraphLib.pro
+PableLib.file = PableLib/PableLib.pro
 
 # what subproject depends on others
-PableApplication.depends = GraphLib
+PableApplication.depends = PableLib
+PableTests.depends = PableLib

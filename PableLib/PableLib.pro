@@ -4,5 +4,7 @@ CONFIG += staticlib
 include(../common.pri)
 
 # Input
-SOURCES += node.cpp
-HEADERS += node.h
+SOURCES += \
+    cellindex.cpp
+HEADERS += \
+    cellindex.h
