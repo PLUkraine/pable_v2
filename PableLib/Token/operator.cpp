@@ -3,23 +3,20 @@
 namespace Pable {
 namespace Tokens {
 
-Operator::Operator(std::function<double (double, double)> func, int precedence, char symbol)
+std::shared_ptr<Operator> plusOp = std::make_shared<Operator>(2, '+');
+std::shared_ptr<Operator> minusOp = std::make_shared<Operator>(2, '-');
+
+Operator::Operator(int precedence, char symbol)
     : Token(Type::Operator),
-      mFunc(func),
       mPrecedence(precedence),
       mSymbol(symbol)
 {
 }
 
 Operator::Operator(const Operator &other)
-    : Operator(other.mFunc, other.mPrecedence, other.mSymbol)
+    : Operator(other.mPrecedence, other.mSymbol)
 {
 
-}
-
-double Operator::apply(double op1, double op2) const
-{
-    return mFunc(op1, op2);
 }
 
 int Operator::precedence() const
@@ -46,7 +43,6 @@ bool Operator::operator==(const Operator &other) const
 void swap(Operator &first, Operator &second)
 {
     using std::swap;
-    swap(first.mFunc, second.mFunc);
     swap(first.mPrecedence, second.mPrecedence);
     swap(first.mSymbol, second.mSymbol);
 }

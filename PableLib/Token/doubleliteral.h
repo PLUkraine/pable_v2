@@ -5,13 +5,13 @@
 namespace Pable {
 namespace Tokens {
 
-class Literal : public Token
+class DoubleLiteral : public Token
 {
 public:
-    Literal(double value);
+    DoubleLiteral(double value);
 
     double value() const;
-    bool operator==(const Literal &other) const;
+    bool operator==(const DoubleLiteral &other) const;
 
 private:
     double mValue;

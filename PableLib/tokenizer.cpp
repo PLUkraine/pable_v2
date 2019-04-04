@@ -1,6 +1,6 @@
 #include "tokenizer.h"
 
-#include "Token/literal.h"
+#include "Token/doubleliteral.h"
 #include "Token/operator.h"
 
 
@@ -25,14 +25,14 @@ QList<std::shared_ptr<Tokens::Token> > Tokenizer::tokenize(const QString &exp) c
         }
         else {
             if (state == TokenizerState::Number) {
-                answer << std::make_shared<Tokens::Literal>(numSoFar);
+                answer << std::make_shared<Tokens::DoubleLiteral>(numSoFar);
                 numSoFar = 0;
                 state = TokenizerState::Whitespace;
             }
 
             if (isOp(c.toLatin1())) {
                 auto op = c == '+' ? Tokens::plusOp : Tokens::minusOp;
-                answer << std::make_shared<Tokens::Operator>(op);
+                answer << op;
             }
             else if (!c.isSpace()){
                 QString message = "Unknown char: %1";
@@ -42,7 +42,7 @@ QList<std::shared_ptr<Tokens::Token> > Tokenizer::tokenize(const QString &exp) c
     }
 
     if (state == TokenizerState::Number) {
-        answer << std::make_shared<Tokens::Literal>(numSoFar);
+        answer << std::make_shared<Tokens::DoubleLiteral>(numSoFar);
     }
 
     return answer;

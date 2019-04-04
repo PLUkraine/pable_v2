@@ -1,21 +1,21 @@
-#include "literal.h"
+#include "doubleliteral.h"
 #include <QtGlobal>
 
 namespace Pable {
 namespace Tokens {
 
-Literal::Literal(double value)
+DoubleLiteral::DoubleLiteral(double value)
     : Token(Type::Literal),
       mValue(value)
 {
 }
 
-double Literal::value() const
+double DoubleLiteral::value() const
 {
     return mValue;
 }
 
-bool Literal::operator==(const Literal &other) const
+bool DoubleLiteral::operator==(const DoubleLiteral &other) const
 {
     return qFuzzyCompare(mValue, other.mValue);
 }

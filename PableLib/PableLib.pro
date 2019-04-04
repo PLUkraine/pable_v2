@@ -14,5 +14,5 @@ HEADERS += \
     cellindex.h \
     Token/token.h \
     tokenizer.h \
-    Token/literal.h \
-    Token/operator.h
+    Token/operator.h \
+    Token/doubleliteral.h
