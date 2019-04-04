@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Token/token.h"
+#include <memory>
 
 namespace Pable {
 namespace Tokens {
@@ -16,6 +17,8 @@ public:
 private:
     double mValue;
 };
+
+std::shared_ptr<DoubleLiteral> doubleLiteral(double value);
 
 } // namespace Tokens
 } // namespace Pable

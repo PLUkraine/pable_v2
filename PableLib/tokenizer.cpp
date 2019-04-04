@@ -25,7 +25,7 @@ QList<std::shared_ptr<Tokens::Token> > Tokenizer::tokenize(const QString &exp) c
         }
         else {
             if (state == TokenizerState::Number) {
-                answer << std::make_shared<Tokens::DoubleLiteral>(numSoFar);
+                answer << Tokens::doubleLiteral(numSoFar);
                 numSoFar = 0;
                 state = TokenizerState::Whitespace;
             }

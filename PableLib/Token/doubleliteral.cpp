@@ -20,5 +20,10 @@ bool DoubleLiteral::operator==(const DoubleLiteral &other) const
     return qFuzzyCompare(mValue, other.mValue);
 }
 
+std::shared_ptr<DoubleLiteral> doubleLiteral(double value)
+{
+    return std::make_shared<DoubleLiteral>(value);
+}
+
 } // namespace Tokens
 } // namespace Pable

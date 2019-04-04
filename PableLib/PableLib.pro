@@ -8,8 +8,8 @@ SOURCES += \
     cellindex.cpp \
     Token/token.cpp \
     tokenizer.cpp \
-    Token/literal.cpp \
-    Token/operator.cpp
+    Token/operator.cpp \
+    Token/doubleliteral.cpp
 HEADERS += \
     cellindex.h \
     Token/token.h \
