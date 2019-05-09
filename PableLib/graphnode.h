@@ -1,5 +1,25 @@
 #pragma once
 #include <vector>
+#include <variant>
+#include <string>
+
+/* TODO maybe used in the future
+struct NodeError
+{
+    enum Error {
+        Recursion, InvalidValue, Count
+    } error;
+
+    std::string to_string() const {
+        switch (error)
+        {
+            case Recursion: return "#RECURSION";
+            case InvalidValue: return "#INVALID";
+            default: throw std::runtime_error("Invalid Error Enum");
+        }
+    }
+};
+*/
 
 using GraphNodeValue = int;
 

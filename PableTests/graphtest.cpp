@@ -12,6 +12,10 @@ void GraphTest::testLoopDetector()
         g[3] = {4};
 
         QVERIFY(not detector.hasCycle(g, 0));
+        QVERIFY(not detector.hasCycle(g, 1));
+        QVERIFY(not detector.hasCycle(g, 2));
+        QVERIFY(not detector.hasCycle(g, 3));
+        QVERIFY(not detector.hasCycle(g, 4));
     }
     {
         EdgeList g(10, std::vector<int>());
@@ -21,6 +25,8 @@ void GraphTest::testLoopDetector()
         g[3] = {4};
 
         QVERIFY(detector.hasCycle(g, 0));
+        QVERIFY(detector.hasCycle(g, 1));
+        QVERIFY(detector.hasCycle(g, 2));
     }
     {
         EdgeList g(10, std::vector<int>());

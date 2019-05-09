@@ -11,7 +11,7 @@ Graph::Graph()
 
 bool Graph::setValue(int id, const GraphNodeValue &newValue)
 {
-    int oldValue = mNodes[id].value;
+    auto oldValue = mNodes[id].value;
     mNodes[id].value = newValue;
     // if not valid, reset oldValue
     if (!validate(id)) {
