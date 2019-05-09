@@ -1,11 +1,11 @@
 TEMPLATE = subdirs
 
-SUBDIRS += \
-    PableApplication\
-    PableLib \
-    PableTests
+CONFIG += ordered
 
-# CONFIG += ordered
+SUBDIRS += \
+    PableLib\
+    PableTests\
+    PableApplication
 
 PableApplication.file = PableApplication/PableApplication.pro
 PableLib.file = PableLib/PableLib.pro
