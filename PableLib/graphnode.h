@@ -1,35 +1,16 @@
 #pragma once
 #include <vector>
-#include <variant>
-#include <string>
+#include <memory>
+#include "utils.h"
 
-/* TODO maybe used in the future
-struct NodeError
-{
-    enum Error {
-        Recursion, InvalidValue, Count
-    } error;
-
-    std::string to_string() const {
-        switch (error)
-        {
-            case Recursion: return "#RECURSION";
-            case InvalidValue: return "#INVALID";
-            default: throw std::runtime_error("Invalid Error Enum");
-        }
-    }
-};
-*/
-
-using GraphNodeValue = int;
+class IExpression;
 
 struct GraphNode
 {
     int id;
-    GraphNodeValue value;
+    std::shared_ptr<IExpression> expression;
 
-    GraphNode(): id(-1), value(0) {}
-    GraphNode(int id, const GraphNodeValue &value): id(id), value(value) {}
+    GraphNode(int id);
 };
 
 using NodeList = std::vector<GraphNode>;

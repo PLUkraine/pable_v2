@@ -1,5 +1,5 @@
 #include "graph.h"
-#include "utils.h"
+#include "expression.h"
 
 int Graph::MAX_NODES = 4096;
 
@@ -9,13 +9,13 @@ Graph::Graph()
     initializeGraph();
 }
 
-bool Graph::setValue(int id, const GraphNodeValue &newValue)
+bool Graph::setValue(int id, std::shared_ptr<IExpression> newExpression)
 {
-    auto oldValue = mNodes[id].value;
-    mNodes[id].value = newValue;
+    auto oldExpression = mNodes[id].expression;
+    mNodes[id].expression = newExpression;
     // if not valid, reset oldValue
     if (!validate(id)) {
-        mNodes[id].value = oldValue;
+        mNodes[id].expression = oldExpression;
         return false;
     }
 
@@ -23,9 +23,10 @@ bool Graph::setValue(int id, const GraphNodeValue &newValue)
     return true;
 }
 
-GraphNodeValue Graph::value(int id) const
+Number Graph::value(int id) const
 {
-    return mNodes[id].value;
+    assert(mNodes[id].expression->hasResult());
+    return mNodes[id].expression->result();
 }
 
 bool Graph::validate(int idChanged)
@@ -38,6 +39,12 @@ void Graph::recompute(int idChanged)
 {
     // TODO topological sorting
     UNUSED_PARAM(idChanged);
+    // 1. Topological sort on forward starting from our node
+    // 2. Compute all values according to the sort order
+    // 3. Topological sort on backward starting from our node
+    // 4. Compute all values according to the sort order
+    // 5. ???
+    // 6. ALL DONE
 }
 
 void Graph::initializeGraph()
@@ -46,7 +53,7 @@ void Graph::initializeGraph()
     mNodes.reserve(MAX_NODES);
     for (int i=0; i<MAX_NODES; ++i)
     {
-        mNodes[i] = {i, 0};
+        mNodes.emplace_back(i);
     }
 
     // no edges, yet

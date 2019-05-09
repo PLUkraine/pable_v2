@@ -1,8 +1,4 @@
 #include "graphloopdetector.h"
-#include "utils.h"
-
-using IdEdge = std::pair<int, int>;
-
 
 GraphLoopDetector::GraphLoopDetector(int maxNodes)
     : mColor(maxNodes, 0)
