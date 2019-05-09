@@ -21,12 +21,12 @@ bool GraphLoopDetector::dfs(const EdgeList &g, int v)
     mColor[v] = 1;
     for (const int to : g[v])
     {
-        if (mColor[v] == 0)
+        if (mColor[to] == 0)
         {
             if (dfs(g, to))
                 return true;
         }
-        if (mColor[v] == 1)
+        if (mColor[to] == 1)
             return true;
     }
     mColor[v] = 2;

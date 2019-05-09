@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "parsertest.h"
+#include "graphtest.h"
 
 
 int main(int argc, char** argv)
@@ -11,6 +12,7 @@ int main(int argc, char** argv)
         delete obj;
    };
 
+   ASSERT_TEST(new GraphTest());
    ASSERT_TEST(new ParserTest());
 
    return status;
