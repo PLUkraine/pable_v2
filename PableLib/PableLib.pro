@@ -5,6 +5,10 @@ include(../common.pri)
 
 # Input
 SOURCES += \
-    graph.cpp
+    graph.cpp \
+    graphloopdetector.cpp
 HEADERS += \
-    graph.h
+    graph.h \
+    graphloopdetector.h \
+    graphnode.h \
+    utils.h
