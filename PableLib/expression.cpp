@@ -1,11 +1,23 @@
 #include "expression.h"
 
-namespace
-{
-    PExpression __nullExpression = std::make_shared<NullExpression>();
-}
 
-PExpression nullExpression()
+void Graph::changeExpression(GraphId where, ExpressionPtr to)
 {
-    return __nullExpression;
+    GraphDependencyUpdator().updateDependencies(mForward, mBackward, to->dependencies());
+
+    auto forwardTopologySort = TopologySorting().sortBackwards(mForward, where);
+    for (int id : forwardTopologySort)
+    {
+        mCells[id]->evaluate(mCells);
+    }
+
+    // TODO update dependent nodes
+    if ((mCells[where]->result()).index() == 0)
+    {
+        // VALUE HAS NO ERRORS
+    }
+    else
+    {
+        // ERROR IN NODE; SET ERROR TO ALL DEPENDENT NODES
+    }
 }
