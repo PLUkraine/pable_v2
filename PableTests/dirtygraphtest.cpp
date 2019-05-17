@@ -54,26 +54,37 @@ void DirtyGraphTest::testCycleDetection()
 
 void DirtyGraphTest::testInvalidate()
 {
-    const int COUNT = 8;
+    const int COUNT = 10;
     DirtyGraph graph(COUNT);
     graph.addEdge(0, 1);
     graph.addEdge(0, 2);
     graph.addEdge(2, 3);
     graph.addEdge(0, 4);
 
+    graph.addEdge(0, 5);
+    graph.addEdge(0, 6);
+    graph.addEdge(5, 7);
+    graph.addEdge(6, 7);
+
+    auto nodeSet = {0, 1, 2, 3, 4, 5, 6, 7};
     graph.setInvalid(0);
-    auto actual = graph.getValues({0, 1, 2, 3, 4});
-    std::vector<std::optional<int>> expected = {std::nullopt, 0, 0, 0, 0};
+    auto actual = graph.getValues(nodeSet);
+    std::vector<std::optional<int>> expected = {std::nullopt, 0, 0, 0, 0, 0, 0, 0};
     QCOMPARE(actual, expected);
 
     graph.setInvalid(3);
-    actual = graph.getValues({0, 1, 2, 3, 4});
-    expected = {std::nullopt, 0, std::nullopt, std::nullopt, 0};
+    actual = graph.getValues(nodeSet);
+    expected = {std::nullopt, 0, std::nullopt, std::nullopt, 0, 0, 0, 0};
     QCOMPARE(actual, expected);
 
     graph.setInvalid(1);
-    actual = graph.getValues({0, 1, 2, 3, 4});
-    expected = {std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0};
+    actual = graph.getValues(nodeSet);
+    expected = {std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, 0, 0, 0};
+    QCOMPARE(actual, expected);
+
+    graph.setInvalid(7);
+    actual = graph.getValues(nodeSet);
+    expected = {std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0, std::nullopt, std::nullopt, std::nullopt};
     QCOMPARE(actual, expected);
 }
 
