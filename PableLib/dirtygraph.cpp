@@ -1,5 +1,9 @@
 #include "dirtygraph.h"
 
+const char DirtyGraph::WHITE = 0;
+const char DirtyGraph::GRAY = 1;
+const char DirtyGraph::BLACK = 2;
+
 DirtyGraph::DirtyGraph(int nodes)
     : mCount(nodes),
       mForward(mCount, std::vector<int>()),
@@ -90,9 +94,6 @@ std::vector<int> DirtyGraph::detectReverseCycle(int from)
 
 std::vector<int> DirtyGraph::findCycle(int v, const std::vector<std::vector<int> > &edges)
 {
-    const char WHITE = 0;
-    const char GRAY = 1;
-    const char BLACK = 2;
     std::vector<char> colors(mCount, WHITE);
 
     std::vector<int> par(mCount, -1);
@@ -140,19 +141,19 @@ std::vector<int> DirtyGraph::findCycle(int v, const std::vector<std::vector<int>
 void DirtyGraph::updateNodesDependantOn(std::vector<int> nodes)
 {
     // do not visit same nodes twice
-    std::vector<char> used(mCount, false);
+    std::vector<char> color(mCount, WHITE);
     // update invalid first.
     for (int v : nodes)
     {
-        if (!used[v] && !mValues[v].has_value())
+        if (color[v] == WHITE && !mValues[v].has_value())
         {
-            errorUpdateDfs(v, used);
+            errorUpdateDfs(v, color);
         }
     }
     // here every invalid node is reached. update all remaining nodes
     for (int v : nodes)
     {
-        if (!used[v])
+        if (color[v] == WHITE)
         {
             // should have value
             assert(mValues[v].has_value());
@@ -179,13 +180,13 @@ std::optional<int> DirtyGraph::updateDirectValue(int where)
     return mValues[where];
 }
 
-void DirtyGraph::errorUpdateDfs(int v, std::vector<char> &used)
+void DirtyGraph::errorUpdateDfs(int v, std::vector<char> &color)
 {
-    used[v] = true;
+    color[v] = BLACK;
     mValues[v] = std::nullopt;
     for (int to : mReverse[v])
     {
-        if (!used[to])
-            errorUpdateDfs(to, used);
+        if (color[to] == WHITE)
+            errorUpdateDfs(to, color);
     }
 }
