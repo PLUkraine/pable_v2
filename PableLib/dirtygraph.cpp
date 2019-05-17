@@ -11,14 +11,17 @@ DirtyGraph::DirtyGraph(int nodes)
 
 void DirtyGraph::addEdge(int from, int to)
 {
+    // add forward and backward edge
     mForward[from].push_back(to);
     mReverse[to].push_back(from);
 
+    // detect forward cycle
     auto cycle = detectForwardCycle(from);
     if (cycle.empty())
     {
-        // recompute this value
-        // recompute backward values
+        // all is good, update this and all dependent nodes
+        updateDirectValue(from);
+        updateNodesDependantOn({from});
     }
     else
     {
@@ -36,6 +39,7 @@ bool DirtyGraph::setValue(int v, int value)
         return false;
     }
 
+    // set value and update dependent nodes
     mValues[v] = value;
     updateNodesDependantOn({v});
     return mValues[v].has_value();
@@ -43,6 +47,7 @@ bool DirtyGraph::setValue(int v, int value)
 
 void DirtyGraph::setInvalid(int v)
 {
+    // invalidate all dependent nodes
     mValues[v] = std::nullopt;
     updateNodesDependantOn({v});
 }
@@ -134,21 +139,25 @@ std::vector<int> DirtyGraph::findCycle(int v, const std::vector<std::vector<int>
 
 void DirtyGraph::updateNodesDependantOn(std::vector<int> nodes)
 {
+    // do not visit same nodes twice
     std::vector<char> used(mCount, false);
-    // update invalid first
+    // update invalid first.
     for (int v : nodes)
     {
-        if (!mValues[v].has_value())
+        if (!used[v] && !mValues[v].has_value())
         {
             errorUpdateDfs(v, used);
         }
     }
-    // then update normal ones
+    // here every invalid node is reached. update all remaining nodes
     for (int v : nodes)
     {
-        if (mValues[v].has_value())
+        if (!used[v])
         {
-            // update normally
+            // should have value
+            assert(mValues[v].has_value());
+            // topology sorting
+            // update nodes according to the order
         }
     }
 }

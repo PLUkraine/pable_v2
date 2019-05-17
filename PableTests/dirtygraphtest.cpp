@@ -76,3 +76,18 @@ void DirtyGraphTest::testInvalidate()
     expected = {std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0};
     QCOMPARE(actual, expected);
 }
+
+void DirtyGraphTest::testCycleInvalidation()
+{
+    const int COUNT = 8;
+    DirtyGraph graph(COUNT);
+    graph.addEdge(0, 1);
+    graph.addEdge(1, 2);
+    graph.addEdge(2, 3);
+    graph.addEdge(3, 1);
+    graph.addEdge(3, 4);
+
+    auto actual = graph.getValues({0, 1, 2, 3, 4});
+    std::vector<std::optional<int>> expected = {std::nullopt, std::nullopt, std::nullopt, std::nullopt, 0};
+    QCOMPARE(actual, expected);
+}
