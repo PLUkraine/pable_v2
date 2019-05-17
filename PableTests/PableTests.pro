@@ -9,6 +9,7 @@ include(../common.pri)
 TEMPLATE = app
 
 SOURCES += \
+    dirtygraphtest.cpp \
     testmain.cpp \
     parsertest.cpp \
     testutils.cpp
@@ -26,5 +27,6 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/
 else:unix: PRE_TARGETDEPS += $$OUT_PWD/../PableLib/libPableLib.a
 
 HEADERS += \
+    dirtygraphtest.h \
     parsertest.h \
     testutils.h

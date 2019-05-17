@@ -62,7 +62,7 @@ public:
 class Graph
 {
     void changeExpression(GraphId where, ExpressionPtr to);
-    void reevaluateDepencent(GraphId where);
+    void reevaluateDependent(GraphId where);
 
 private:
     ExpressionMap mCells;
