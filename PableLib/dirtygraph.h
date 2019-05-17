@@ -7,6 +7,8 @@
 #include <string>
 #include <optional>
 
+#define UNUSED(x) (void)(x)
+
 class DirtyGraph
 {
 private:
@@ -19,7 +21,10 @@ public:
     DirtyGraph(int nodes);
 
     void addEdge(int from, int to);
-    void setValue(int v, int value);
+    bool setValue(int v, int value);
+    void setInvalid(int v);
+    std::optional<int> getValue(int where);
+    std::vector<std::optional<int>> getValues(std::vector<int> where);
     void clear();
     int countDependencies(int where);
 
@@ -28,6 +33,11 @@ public:
 
 private:
     std::vector<int> findCycle(int v, const std::vector<std::vector<int>>& edges);
+    void updateNodesDependantOn(std::vector<int> vertices);
+    std::optional<int> updateDirectValue(int where);
+
+    void errorUpdateDfs(int v, std::vector<char>& used);
+    void topologySort(int v, std::vector<char>& color);
 };
 
 #endif // DIRTYGRAPH_H

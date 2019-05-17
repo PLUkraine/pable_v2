@@ -14,19 +14,51 @@ void DirtyGraph::addEdge(int from, int to)
     mForward[from].push_back(to);
     mReverse[to].push_back(from);
 
-    // recursion check
+    auto cycle = detectForwardCycle(from);
+    if (cycle.empty())
+    {
+        // recompute this value
+        // recompute backward values
+    }
+    else
+    {
+        // nullopt all values dependent on cycle
+        mValues[cycle[0]] = std::nullopt;
+        updateNodesDependantOn(cycle);
+    }
 }
 
-void DirtyGraph::setValue(int v, int value)
+bool DirtyGraph::setValue(int v, int value)
 {
-    int newValue = value;
-    for (int to : mForward[v])
+    // do nothing if error
+    if (!mValues[v].has_value())
     {
-        newValue += mValues[to].value_or(0);
+        return false;
     }
-    mValues[v] = newValue;
 
-    // update dependencies
+    mValues[v] = value;
+    updateNodesDependantOn({v});
+    return mValues[v].has_value();
+}
+
+void DirtyGraph::setInvalid(int v)
+{
+    mValues[v] = std::nullopt;
+    updateNodesDependantOn({v});
+}
+
+std::optional<int> DirtyGraph::getValue(int where)
+{
+    return mValues[where];
+}
+
+std::vector<std::optional<int>> DirtyGraph::getValues(std::vector<int> where)
+{
+    std::vector<std::optional<int>> answer(where.size());
+    std::transform(where.begin(), where.end(), answer.begin(), [this](int v) {
+        return mValues[v];
+    });
+    return answer;
 }
 
 void DirtyGraph::clear()
@@ -53,10 +85,10 @@ std::vector<int> DirtyGraph::detectReverseCycle(int from)
 
 std::vector<int> DirtyGraph::findCycle(int v, const std::vector<std::vector<int> > &edges)
 {
-    const int WHITE = 0;
-    const int GRAY = 1;
-    const int BLACK = 2;
-    std::vector<int> colors(mCount, WHITE);
+    const char WHITE = 0;
+    const char GRAY = 1;
+    const char BLACK = 2;
+    std::vector<char> colors(mCount, WHITE);
 
     std::vector<int> par(mCount, -1);
     int cycleEnd = -1;
@@ -98,4 +130,53 @@ std::vector<int> DirtyGraph::findCycle(int v, const std::vector<std::vector<int>
         return cycle;
     }
     return {};
+}
+
+void DirtyGraph::updateNodesDependantOn(std::vector<int> nodes)
+{
+    std::vector<char> used(mCount, false);
+    // update invalid first
+    for (int v : nodes)
+    {
+        if (!mValues[v].has_value())
+        {
+            errorUpdateDfs(v, used);
+        }
+    }
+    // then update normal ones
+    for (int v : nodes)
+    {
+        if (mValues[v].has_value())
+        {
+            // update normally
+        }
+    }
+}
+
+std::optional<int> DirtyGraph::updateDirectValue(int where)
+{
+    int answer = 0;
+    for (int depend : mForward[where])
+    {
+        auto val = mValues[depend];
+        if (!val.has_value()) {
+            mValues[where] = std::nullopt;
+            return mValues[where];
+        }
+        answer += val.value_or(0);
+    }
+
+    mValues[where] = answer;
+    return mValues[where];
+}
+
+void DirtyGraph::errorUpdateDfs(int v, std::vector<char> &used)
+{
+    used[v] = true;
+    mValues[v] = std::nullopt;
+    for (int to : mReverse[v])
+    {
+        if (!used[to])
+            errorUpdateDfs(to, used);
+    }
 }

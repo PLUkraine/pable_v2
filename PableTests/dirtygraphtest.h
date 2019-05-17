@@ -9,4 +9,5 @@ class DirtyGraphTest : public QObject
 private Q_SLOTS:
     void testClear();
     void testCycleDetection();
+    void testInvalidate();
 };
