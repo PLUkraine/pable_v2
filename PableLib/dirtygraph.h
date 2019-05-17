@@ -37,11 +37,11 @@ private:
     static const char BLACK;
 
     std::vector<int> findCycle(int v, const std::vector<std::vector<int>>& edges);
-    void updateNodesDependantOn(std::vector<int> vertices);
+    void updateDependentOn(std::vector<int> vertices);
     std::optional<int> updateDirectValue(int where);
 
-    void errorUpdateDfs(int v, std::vector<char>& color);
-    void topologySort(int v, std::vector<char>& color);
+    void errorUpdateDfs(int v, std::vector<std::vector<int> > &edges, std::vector<char>& color);
+    bool topologySort(int v, std::vector<std::vector<int> > &edges, std::vector<char>& color, std::vector<int> &result);
 };
 
 #endif // DIRTYGRAPH_H

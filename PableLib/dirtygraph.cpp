@@ -25,13 +25,13 @@ void DirtyGraph::addEdge(int from, int to)
     {
         // all is good, update this and all dependent nodes
         updateDirectValue(from);
-        updateNodesDependantOn({from});
+        updateDependentOn({from});
     }
     else
     {
         // nullopt all values dependent on cycle
         mValues[cycle[0]] = std::nullopt;
-        updateNodesDependantOn(cycle);
+        updateDependentOn(cycle);
     }
 }
 
@@ -45,7 +45,7 @@ bool DirtyGraph::setValue(int v, int value)
 
     // set value and update dependent nodes
     mValues[v] = value;
-    updateNodesDependantOn({v});
+    updateDependentOn({v});
     return mValues[v].has_value();
 }
 
@@ -53,7 +53,7 @@ void DirtyGraph::setInvalid(int v)
 {
     // invalidate all dependent nodes
     mValues[v] = std::nullopt;
-    updateNodesDependantOn({v});
+    updateDependentOn({v});
 }
 
 std::optional<int> DirtyGraph::getValue(int where)
@@ -138,7 +138,7 @@ std::vector<int> DirtyGraph::findCycle(int v, const std::vector<std::vector<int>
     return {};
 }
 
-void DirtyGraph::updateNodesDependantOn(std::vector<int> nodes)
+void DirtyGraph::updateDependentOn(std::vector<int> nodes)
 {
     // do not visit same nodes twice
     std::vector<char> color(mCount, WHITE);
@@ -147,7 +147,7 @@ void DirtyGraph::updateNodesDependantOn(std::vector<int> nodes)
     {
         if (color[v] == WHITE && !mValues[v].has_value())
         {
-            errorUpdateDfs(v, color);
+            errorUpdateDfs(v, mReverse, color);
         }
     }
     // here every invalid node is reached. update all remaining nodes
@@ -157,8 +157,16 @@ void DirtyGraph::updateNodesDependantOn(std::vector<int> nodes)
         {
             // should have value
             assert(mValues[v].has_value());
-            // topology sorting
-            // update nodes according to the order
+
+            std::vector<int> order;
+            bool canSort = topologySort(v, mReverse, color, order);
+            std::reverse(order.begin(), order.end());
+            // should be able to sort
+            assert(canSort);
+            for (int to : order)
+            {
+                updateDirectValue(to);
+            }
         }
     }
 }
@@ -180,13 +188,36 @@ std::optional<int> DirtyGraph::updateDirectValue(int where)
     return mValues[where];
 }
 
-void DirtyGraph::errorUpdateDfs(int v, std::vector<char> &color)
+void DirtyGraph::errorUpdateDfs(int v, std::vector<std::vector<int>> &edges, std::vector<char> &color)
 {
     color[v] = BLACK;
     mValues[v] = std::nullopt;
-    for (int to : mReverse[v])
+    for (int to : edges[v])
     {
         if (color[to] == WHITE)
-            errorUpdateDfs(to, color);
+            errorUpdateDfs(to, edges, color);
     }
+}
+
+bool DirtyGraph::topologySort(int v, std::vector<std::vector<int>> &edges, std::vector<char> &color, std::vector<int>& result)
+{
+    color[v] = GRAY;
+    for (int to : edges[v])
+    {
+        if (color[to] == WHITE)
+        {
+            if (!topologySort(to, edges, color, result))
+            {
+                return false;
+            }
+        }
+        if (color[to] == GRAY)
+        {
+            result.clear();
+            return false;
+        }
+    }
+    result.push_back(v);
+    color[v] = BLACK;
+    return true;
 }
