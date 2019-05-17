@@ -21,10 +21,11 @@ public:
     DirtyGraph(int nodes);
 
     void addEdge(int from, int to);
+    void addEdges(const std::vector<std::pair<int, int>> &edges);
     bool setValue(int v, int value);
     void setInvalid(int v);
     std::optional<int> getValue(int where);
-    std::vector<std::optional<int>> getValues(std::vector<int> where);
+    std::vector<std::optional<int>> getValues(const std::vector<int> &where);
     void clear();
     int countDependencies(int where);
 
@@ -36,12 +37,17 @@ private:
     static const char GRAY;
     static const char BLACK;
 
-    std::vector<int> findCycle(int v, const std::vector<std::vector<int>>& edges);
-    void updateDependentOn(std::vector<int> vertices);
+    std::vector<int> findCycle(int v, std::vector<char> &colors, const std::vector<std::vector<int>>& edges);
+    void updateDependentOn(const std::vector<int> &vertices);
     std::optional<int> updateDirectValue(int where);
 
-    void errorUpdateDfs(int v, std::vector<std::vector<int> > &edges, std::vector<char>& color);
-    bool topologySort(int v, std::vector<std::vector<int> > &edges, std::vector<char>& color, std::vector<int> &result);
+    void errorUpdateDfs(int v,
+                        const std::vector<std::vector<int> > &edges,
+                        std::vector<char>& color);
+    bool topologySort(int v,
+                      const std::vector<std::vector<int> > &edges,
+                      std::vector<char>& color,
+                      std::vector<int> &result);
 };
 
 #endif // DIRTYGRAPH_H
