@@ -1,4 +1,5 @@
 #include "spreadsheetmodel.h"
+#include "parser.h"
 
 SpreadsheetModel::SpreadsheetModel(QObject *parent)
     : QAbstractTableModel(parent)
@@ -33,12 +34,10 @@ QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, 
     {
         QString headerTemplate;
         if (orientation == Qt::Horizontal) {
-            headerTemplate = "c%1";
+            return QString::fromStdString(CellIndex::columnIndexToAlpha(section+1));
         } else {
-            headerTemplate = "r%1";
+            return QString::number(section);
         }
-
-        return headerTemplate.arg(section);
     }
 
 

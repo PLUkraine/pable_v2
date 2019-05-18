@@ -40,6 +40,19 @@ int CellIndex::columnAlphaToIndex(const std::string &alpha)
     return result-1;
 }
 
+std::string CellIndex::columnIndexToAlpha(int index)
+{
+    std::string result;
+    while (index > 0) {
+        size_t remainder = (index-1u+26u) % 26u;
+
+        result.push_back(remainder + 'A');
+        index = (index-1) / 26;
+    }
+    std::reverse(result.begin(), result.end());
+    return result;
+}
+
 Expression::Expression()
 {
     mRpn.emplace_back(0);

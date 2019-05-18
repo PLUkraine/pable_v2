@@ -18,6 +18,7 @@ public:
     {}
 
     static int columnAlphaToIndex(const std::string &alpha);
+    static std::string columnIndexToAlpha(int index);
     friend bool operator==(const CellIndex &a, const CellIndex &b);
     inline int row() const {return mRow;}
     inline int col() const {return mCol;}
