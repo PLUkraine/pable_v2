@@ -19,14 +19,7 @@ void DirtyGraph::addEdge(int from, int to)
     mForward[from].insert(to);
     mReverse[to].insert(from);
 
-    // detect forward cycle
-    auto cycle = detectForwardCycle(from);
-    if (!cycle.empty())
-    {
-        // nullopt all values dependent on cycle
-        mValues[cycle[0]] = std::nullopt;
-        updateDependentOn({cycle[0]});
-    }
+    handleCycleDetection(from);
 }
 void DirtyGraph::removeEdge(int from, int to)
 {
@@ -34,9 +27,25 @@ void DirtyGraph::removeEdge(int from, int to)
     mReverse[to].erase(from);
 }
 
-void DirtyGraph::reevaluate(int)
+std::optional<int> DirtyGraph::reevaluate(int where)
 {
-    // TODO
+    if (!handleCycleDetection(where))
+    {
+        assert(mValues[where] == std::nullopt);
+        return std::nullopt;
+    }
+
+    std::vector<char> color(mCount, WHITE);
+    std::vector<int> order;
+    bool canSort = topologySort(where, mForward, color, order);
+    assert(canSort);
+    for (int to : order)
+    {
+        updateDirectValue(to);
+    }
+
+    updateDependentOn({where});
+    return mValues[where];
 }
 
 //void DirtyGraph::addEdges(const std::vector<std::pair<int, int> > &edges)
@@ -195,6 +204,8 @@ void DirtyGraph::updateDependentOn(const std::vector<int> &nodes, std::vector<ch
             assert(canSort);
             for (int to : order)
             {
+                // do not recompute for currentNode
+                if (to == v) continue;
                 updateDirectValue(to);
             }
         }
@@ -216,6 +227,19 @@ std::optional<int> DirtyGraph::updateDirectValue(int where)
 
     mValues[where] = answer;
     return mValues[where];
+}
+
+bool DirtyGraph::handleCycleDetection(int where)
+{
+    auto cycle = detectForwardCycle(where);
+    if (!cycle.empty())
+    {
+        // nullopt all values dependent on cycle
+        mValues[cycle[0]] = std::nullopt;
+        updateDependentOn({cycle[0]});
+        return false;
+    }
+    return true;
 }
 
 void DirtyGraph::errorUpdateDfs(int v,

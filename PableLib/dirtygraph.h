@@ -23,7 +23,7 @@ public:
     void addEdge(int from, int to);
     void removeEdge(int from, int to);
 
-    void reevaluate(int where);
+    std::optional<int> reevaluate(int where);
 
     bool setValue(int v, int value);
     void setInvalid(int v);
@@ -44,6 +44,8 @@ private:
     void updateDependentOn(const std::vector<int> &vertices);
     void updateDependentOn(const std::vector<int> &vertices, std::vector<char> &color);
     std::optional<int> updateDirectValue(int where);
+
+    bool handleCycleDetection(int where);
 
     void errorUpdateDfs(int v,
                         const std::vector<std::set<int> > &edges,

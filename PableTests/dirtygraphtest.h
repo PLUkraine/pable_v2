@@ -9,6 +9,10 @@ class DirtyGraphTest : public QObject
 private Q_SLOTS:
     void testClear();
     void testCycleDetection();
+    void testLongGraphAddEdge();
     void testInvalidate();
     void testCycleInvalidation();
+    void testSetValueSimple();
+    void testSetValueLong();
+    void testReevaluate();
 };
