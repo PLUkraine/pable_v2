@@ -6,7 +6,7 @@ include(../common.pri)
 # Input
 SOURCES += \
     dirtygraph.cpp \
-    expression.cpp
+    parser.cpp
 HEADERS += \
     dirtygraph.h \
-    expression.h
+    parser.h

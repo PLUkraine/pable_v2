@@ -1,5 +1,4 @@
-#ifndef DIRTYGRAPH_H
-#define DIRTYGRAPH_H
+#pragma once
 
 #include <vector>
 #include <set>
@@ -58,4 +57,3 @@ private:
                       std::vector<int> &result);
 };
 
-#endif // DIRTYGRAPH_H
