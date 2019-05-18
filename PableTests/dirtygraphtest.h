@@ -15,4 +15,5 @@ private Q_SLOTS:
     void testSetValueSimple();
     void testSetValueLong();
     void testReevaluate();
+    void testReevaluateAll();
 };

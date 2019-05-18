@@ -48,6 +48,30 @@ std::optional<int> DirtyGraph::reevaluate(int where)
     return mValues[where];
 }
 
+void DirtyGraph::reevaluateAll()
+{
+    std::vector<char> color(mCount, WHITE);
+    for (int v=0; v<mCount; ++v)
+    {
+        if (color[v] == WHITE) {
+            std::vector<int> order;
+            bool canSort = topologySort(v, mForward, color, order);
+            if (!canSort) {
+                mValues[v] = std::nullopt;
+            }
+            else {
+                for (int to : order) {
+                    updateDirectValue(to);
+                }
+                updateDependentOn({v});
+            }
+        }
+        else if (color[v] == GRAY) {
+            mValues[v] = std::nullopt;
+        }
+    }
+}
+
 //void DirtyGraph::addEdges(const std::vector<std::pair<int, int> > &edges)
 //{
 //    for (const auto& edge : edges)

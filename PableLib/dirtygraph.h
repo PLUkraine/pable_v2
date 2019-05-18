@@ -24,6 +24,7 @@ public:
     void removeEdge(int from, int to);
 
     std::optional<int> reevaluate(int where);
+    void reevaluateAll();
 
     bool setValue(int v, int value);
     void setInvalid(int v);
