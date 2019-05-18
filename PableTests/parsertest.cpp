@@ -21,15 +21,15 @@ void ParserTest::testAlphaToIndex()
 
 void ParserTest::testCellIndexParse()
 {
-    QCOMPARE(CellIndex("$A0"), CellIndex(0, 0));
-    QCOMPARE(CellIndex("$G20"), CellIndex(20, 'G'-'A'));
-    QCOMPARE(CellIndex("$EX10"), CellIndex(10, 153));
-    QVERIFY_EXCEPTION_THROWN(CellIndex("~$EX10"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("$EX10$EX1"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("$AAA"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("$30"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("$ZA#30"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("$ZA30 "), std::runtime_error);
+    QCOMPARE(CellIndex::str("$A0"), CellIndex(0, 0));
+    QCOMPARE(CellIndex::str("$G20"), CellIndex(20, 'G'-'A'));
+    QCOMPARE(CellIndex::str("$EX10"), CellIndex(10, 153));
+    QCOMPARE(CellIndex::str("~$EX10"),      std::nullopt);
+    QCOMPARE(CellIndex::str("$EX10$EX1"),   std::nullopt);
+    QCOMPARE(CellIndex::str("$AAA"),        std::nullopt);
+    QCOMPARE(CellIndex::str("$30"),         std::nullopt);
+    QCOMPARE(CellIndex::str("$ZA#30"),      std::nullopt);
+    QCOMPARE(CellIndex::str("$ZA30 "),      std::nullopt);
 }
 
 void ParserTest::testGetDependencies()
@@ -52,5 +52,63 @@ void ParserTest::testGetDependencies()
     expr.setExpression({2, 3, '-', 6, 7, '+', '-'});
     actual = expr.dependencies();
     expected = {};
+    QCOMPARE(actual, expected);
+}
+
+void ParserTest::testEvaluate()
+{
+    std::unordered_map<CellIndex, std::optional<int>> cellValues = {
+        {*CellIndex::str("$A1"), 1},
+        {*CellIndex::str("$BB3"), 10},
+    };
+
+    Expression expr;
+    std::optional<int> actual = expr.evaluate(cellValues);
+    std::optional<int> expected = 0;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({2, 3, '-', 6, 7, '+', '-'});
+    actual = expr.evaluate(cellValues);
+    expected = -14;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({4, 5, '+', 1, '-', *CellIndex::str("$BB3"), '+'});
+    actual = expr.evaluate(cellValues);
+    expected = 18;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({4});
+    actual = expr.evaluate(cellValues);
+    expected = 4;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({9, 2});
+    actual = expr.evaluate(cellValues);
+    expected = std::nullopt;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({});
+    actual = expr.evaluate(cellValues);
+    expected = std::nullopt;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({9, '+', '-'});
+    actual = expr.evaluate(cellValues);
+    expected = std::nullopt;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({9, 2, '$'});
+    actual = expr.evaluate(cellValues);
+    expected = std::nullopt;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({9, *CellIndex::str("$AA2"), '-'});
+    actual = expr.evaluate(cellValues);
+    expected = std::nullopt;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({9, 6, '-', '-'});
+    actual = expr.evaluate(cellValues);
+    expected = std::nullopt;
     QCOMPARE(actual, expected);
 }

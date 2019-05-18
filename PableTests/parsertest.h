@@ -10,4 +10,5 @@ private Q_SLOTS:
     void testAlphaToIndex();
     void testCellIndexParse();
     void testGetDependencies();
+    void testEvaluate();
 };

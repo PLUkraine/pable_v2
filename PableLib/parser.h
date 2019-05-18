@@ -4,13 +4,14 @@
 #include <vector>
 #include <optional>
 #include <variant>
+#include <unordered_map>
 
 class CellIndex
 {
     int mRow;
     int mCol;
 public:
-    CellIndex(const std::string &cell);
+    static std::optional<CellIndex> str(const std::string &cell);
     CellIndex(int row, int col)
         : mRow(row),
           mCol(col)
@@ -47,7 +48,7 @@ private:
 public:
     Expression();
     void setExpression(const std::vector<Token> &rpn);
-    std::optional<int> evaluate();
+    std::optional<int> evaluate(const std::unordered_map<CellIndex, std::optional<int>> &cellValues);
     std::vector<CellIndex> dependencies() const;
 };
 
