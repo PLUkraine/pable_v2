@@ -6,8 +6,8 @@ const char DirtyGraph::BLACK = 2;
 
 DirtyGraph::DirtyGraph(int nodes)
     : mCount(nodes),
-      mForward(mCount, std::vector<int>()),
-      mReverse(mCount, std::vector<int>()),
+      mForward(mCount),
+      mReverse(mCount),
       mValues(mCount, 0)
 {
 
@@ -16,29 +16,47 @@ DirtyGraph::DirtyGraph(int nodes)
 void DirtyGraph::addEdge(int from, int to)
 {
     // add forward and backward edge
-    mForward[from].push_back(to);
-    mReverse[to].push_back(from);
+    mForward[from].insert(to);
+    mReverse[to].insert(from);
 
     // detect forward cycle
     auto cycle = detectForwardCycle(from);
-    if (cycle.empty())
-    {
-        // all is good, update this and all dependent nodes
-        updateDirectValue(from);
-        updateDependentOn({from});
-    }
-    else
+    if (!cycle.empty())
     {
         // nullopt all values dependent on cycle
         mValues[cycle[0]] = std::nullopt;
-        updateDependentOn(cycle);
+        updateDependentOn({cycle[0]});
     }
 }
-
-void DirtyGraph::addEdges(const std::vector<std::pair<int, int> > &)
+void DirtyGraph::removeEdge(int from, int to)
 {
-
+    mForward[from].erase(to);
+    mReverse[to].erase(from);
 }
+
+void DirtyGraph::reevaluate(int)
+{
+    // TODO
+}
+
+//void DirtyGraph::addEdges(const std::vector<std::pair<int, int> > &edges)
+//{
+//    for (const auto& edge : edges)
+//    {
+//        mForward[edge.first].push_back(edge.second);
+//        mReverse[edge.second].push_back(edge.first);
+//    }
+
+//    std::vector<int> cycleVertices;
+//    std::vector<char> color(mCount, WHITE);
+//    for (const auto& edge : edges)
+//    {
+//        auto cycle = findCycle(edge.first, color, mForward);
+//        cycleVertices.insert(cycleVertices.end(), cycle.begin(), cycle.end());
+//    }
+
+//    // TODO
+//}
 
 bool DirtyGraph::setValue(int v, int value)
 {
@@ -77,8 +95,8 @@ std::vector<std::optional<int>> DirtyGraph::getValues(const std::vector<int> &wh
 
 void DirtyGraph::clear()
 {
-    mForward.assign(mCount, std::vector<int>());
-    mReverse.assign(mCount, std::vector<int>());
+    mForward.assign(mCount, std::set<int>());
+    mReverse.assign(mCount, std::set<int>());
     mValues.assign(mCount, 0);
 }
 
@@ -99,7 +117,7 @@ std::vector<int> DirtyGraph::detectReverseCycle(int from)
     return findCycle(from, colors, mReverse);
 }
 
-std::vector<int> DirtyGraph::findCycle(int v, std::vector<char> &colors, const std::vector<std::vector<int> > &edges)
+std::vector<int> DirtyGraph::findCycle(int v, std::vector<char> &colors, const std::vector<std::set<int> > &edges)
 {
     std::vector<int> par(mCount, -1);
     int cycleEnd = -1;
@@ -145,10 +163,15 @@ std::vector<int> DirtyGraph::findCycle(int v, std::vector<char> &colors, const s
     return {};
 }
 
-void DirtyGraph::updateDependentOn(const std::vector<int> &nodes)
+void DirtyGraph::updateDependentOn(const std::vector<int> &vertices)
 {
     // do not visit same nodes twice
     std::vector<char> color(mCount, WHITE);
+    updateDependentOn(vertices, color);
+}
+
+void DirtyGraph::updateDependentOn(const std::vector<int> &nodes, std::vector<char> &color)
+{
     // update invalid first.
     for (int v : nodes)
     {
@@ -196,7 +219,7 @@ std::optional<int> DirtyGraph::updateDirectValue(int where)
 }
 
 void DirtyGraph::errorUpdateDfs(int v,
-                                const std::vector<std::vector<int> > &edges,
+                                const std::vector<std::set<int> > &edges,
                                 std::vector<char> &color)
 {
     color[v] = BLACK;
@@ -209,7 +232,7 @@ void DirtyGraph::errorUpdateDfs(int v,
 }
 
 bool DirtyGraph::topologySort(int v,
-                              const std::vector<std::vector<int>> &edges,
+                              const std::vector<std::set<int> > &edges,
                               std::vector<char> &color,
                               std::vector<int>& result)
 {
