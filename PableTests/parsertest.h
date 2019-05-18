@@ -11,4 +11,6 @@ private Q_SLOTS:
     void testCellIndexParse();
     void testGetDependencies();
     void testEvaluate();
+
+    void testTokenizer();
 };

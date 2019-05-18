@@ -41,6 +41,16 @@ struct std::hash<CellIndex>
 
 using Token = std::variant<int, char, CellIndex>;
 
+class Tokenizer
+{
+public:
+    std::vector<Token> tokenize(const std::string &str) const;
+
+    bool isNumber(const std::string &str) const;
+    bool isCellIndex(const std::string &str) const;
+    bool isOperator(const std::string &str) const;
+};
+
 class Expression
 {
 private:

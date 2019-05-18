@@ -1,5 +1,7 @@
 #include "parser.h"
 #include <cstring>
+#include <sstream>
+#include <algorithm>
 
 std::optional<CellIndex> CellIndex::str(const std::string &cell)
 {
@@ -93,4 +95,43 @@ std::vector<CellIndex> Expression::dependencies() const
             answer.push_back(*pIndex);
     }
     return answer;
+}
+
+std::vector<Token> Tokenizer::tokenize(const std::string &str) const
+{
+    std::stringstream ss(str);
+    std::string token;
+    std::vector<Token> result;
+
+    while (std::getline(ss, token, ' ')) {
+        if (isOperator(token))
+            result.emplace_back(token[0]);
+        else if (isCellIndex(token))
+            result.emplace_back(*CellIndex::str(token));
+        else if (isNumber(token))
+            result.emplace_back(std::stoi(token));
+        else
+            return {};
+    }
+
+    return result;
+}
+
+bool Tokenizer::isNumber(const std::string &str) const
+{
+    // allow minus or plus on start
+    if (str.empty()) return false;
+    auto st = str.cbegin();
+    if (str[0] == '-' || str[0] == '+') st++;
+    return std::all_of(st, str.cend(), isdigit);
+}
+
+bool Tokenizer::isCellIndex(const std::string &str) const
+{
+    return CellIndex::str(str).has_value();
+}
+
+bool Tokenizer::isOperator(const std::string &str) const
+{
+    return str.length() == 1 && (str[0] == '+' || str[0] == '-');
 }

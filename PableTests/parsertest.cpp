@@ -112,3 +112,40 @@ void ParserTest::testEvaluate()
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 }
+
+void ParserTest::testTokenizer()
+{
+    Tokenizer tokenizer;
+
+    auto actual = tokenizer.tokenize("4 5 +");
+    std::vector<Token> expected = {4, 5, '+'};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("-4 +5 -");
+    expected = {-4, 5, '-'};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("-4 +5 $A1 -");
+    expected = {-4, 5, *CellIndex::str("$A1"), '-',};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("+ -100002 - $BBAS1213");
+    expected = {'+', -100002, '-', *CellIndex::str("$BBAS1213")};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("$ B 12 ");
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("3 * 4");
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("$1A");
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize("213.4");
+    expected = {};
+    QCOMPARE(actual, expected);
+}
