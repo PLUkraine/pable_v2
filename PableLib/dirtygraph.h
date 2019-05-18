@@ -25,6 +25,7 @@ public:
 
     std::optional<int> reevaluate(int where);
     void reevaluateAll();
+    void reevaluateIn(const std::vector<int> &vertices, std::vector<char> color);
 
     bool setValue(int v, int value);
     void setInvalid(int v);

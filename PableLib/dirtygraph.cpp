@@ -1,4 +1,5 @@
 #include "dirtygraph.h"
+#include <numeric>
 
 const char DirtyGraph::WHITE = 0;
 const char DirtyGraph::GRAY = 1;
@@ -51,7 +52,14 @@ std::optional<int> DirtyGraph::reevaluate(int where)
 void DirtyGraph::reevaluateAll()
 {
     std::vector<char> color(mCount, WHITE);
-    for (int v=0; v<mCount; ++v)
+    std::vector<int> allVertices(mCount);
+    std::iota(allVertices.begin(), allVertices.end(), 0);
+    reevaluateIn(allVertices, color);
+}
+
+void DirtyGraph::reevaluateIn(const std::vector<int> &vertices, std::vector<char> color)
+{
+    for (int v : vertices)
     {
         if (color[v] == WHITE) {
             std::vector<int> order;
