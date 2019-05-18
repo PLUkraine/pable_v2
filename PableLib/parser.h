@@ -22,6 +22,7 @@ public:
     friend bool operator==(const CellIndex &a, const CellIndex &b);
     inline int row() const {return mRow;}
     inline int col() const {return mCol;}
+    std::string toString() const;
 };
 inline bool operator==(const CellIndex &a, const CellIndex &b)
 {
@@ -55,11 +56,14 @@ public:
 class Expression
 {
 private:
+    std::string mStr;
     std::vector<Token> mRpn;
 public:
+    static std::string toString(const std::vector<Token> &tokens);
     Expression();
     void setExpression(const std::vector<Token> &rpn);
     std::optional<int> evaluate(const std::unordered_map<CellIndex, std::optional<int>> &cellValues);
     std::vector<CellIndex> dependencies() const;
+    std::string toString() const;
 };
 

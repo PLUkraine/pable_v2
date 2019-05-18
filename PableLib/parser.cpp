@@ -42,6 +42,7 @@ int CellIndex::columnAlphaToIndex(const std::string &alpha)
 
 std::string CellIndex::columnIndexToAlpha(int index)
 {
+    index += 1;
     std::string result;
     while (index > 0) {
         size_t remainder = (index-1u+26u) % 26u;
@@ -53,14 +54,22 @@ std::string CellIndex::columnIndexToAlpha(int index)
     return result;
 }
 
+std::string CellIndex::toString() const {
+    std::stringstream ss;
+    ss << '$' << columnIndexToAlpha(mCol) << mRow;
+    return ss.str();
+}
+
 Expression::Expression()
 {
     mRpn.emplace_back(0);
+    mStr = "0";
 }
 
 void Expression::setExpression(const std::vector<Token> &rpn)
 {
     mRpn = rpn;
+    mStr = toString(rpn);
 }
 
 std::optional<int> Expression::evaluate(const std::unordered_map<CellIndex, std::optional<int>> &cellValues)
@@ -108,6 +117,32 @@ std::vector<CellIndex> Expression::dependencies() const
             answer.push_back(*pIndex);
     }
     return answer;
+}
+
+std::string Expression::toString() const
+{
+    return mStr;
+}
+
+std::string Expression::toString(const std::vector<Token> &tokens)
+{
+    std::ostringstream result;
+    for (const auto &token : tokens) {
+        if (auto asInt = std::get_if<int>(&token)) {
+            result << *asInt;
+        }
+        else if (auto asOp = std::get_if<char>(&token)) {
+            result << *asOp;
+        }
+        else if (auto asCell = std::get_if<CellIndex>(&token)) {
+            result << asCell->toString();
+        }
+        else throw std::runtime_error("Cannot cast token to any variant");
+        result << ' ';
+    }
+    auto finalStr = result.str();
+    if (!finalStr.empty()) finalStr.pop_back();
+    return finalStr;
 }
 
 std::vector<Token> Tokenizer::tokenize(const std::string &str) const

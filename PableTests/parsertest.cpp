@@ -113,6 +113,33 @@ void ParserTest::testEvaluate()
     QCOMPARE(actual, expected);
 }
 
+void ParserTest::testToString()
+{
+    Expression expr;
+    auto actual = expr.toString();
+    std::string expected = "0";
+
+    expr.setExpression({4, 5, '+', 1, CellIndex(0, 1)});
+    actual = expr.toString();
+    expected = "4 5 + 1 $B0";
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({*CellIndex::str("$DXH100"), '+'});
+    actual = expr.toString();
+    expected = "$DXH100 +";
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({});
+    actual = expr.toString();
+    expected = "";
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({1});
+    actual = expr.toString();
+    expected = "1";
+    QCOMPARE(actual, expected);
+}
+
 void ParserTest::testTokenizer()
 {
     Tokenizer tokenizer;
