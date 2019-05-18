@@ -1,7 +1,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <optional>
+#include <variant>
 
 class CellIndex
 {
@@ -15,13 +17,14 @@ public:
     {}
 
     static int columnAlphaToIndex(const std::string &alpha);
-    inline bool operator==(const CellIndex &o)
-    {
-        return mRow == o.mRow && mCol == o.mCol;
-    }
+    friend bool operator==(const CellIndex &a, const CellIndex &b);
     inline int row() const {return mRow;}
     inline int col() const {return mCol;}
 };
+inline bool operator==(const CellIndex &a, const CellIndex &b)
+{
+    return a.mRow == b.mRow && a.mCol == b.mCol;
+}
 template<>
 struct std::hash<CellIndex>
 {
@@ -35,14 +38,16 @@ struct std::hash<CellIndex>
     }
 };
 
+using Token = std::variant<int, char, CellIndex>;
+
 class Expression
 {
 private:
-    std::string mRpn;
+    std::vector<Token> mRpn;
 public:
     Expression();
-    void setExpression(std::string rpn);
+    void setExpression(const std::vector<Token> &rpn);
     std::optional<int> evaluate();
-
+    std::vector<CellIndex> dependencies() const;
 };
 

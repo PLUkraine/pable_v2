@@ -9,4 +9,5 @@ class ParserTest : public QObject
 private Q_SLOTS:
     void testAlphaToIndex();
     void testCellIndexParse();
+    void testGetDependencies();
 };

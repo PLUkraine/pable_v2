@@ -21,13 +21,36 @@ void ParserTest::testAlphaToIndex()
 
 void ParserTest::testCellIndexParse()
 {
-    QVERIFY(CellIndex("A0") == CellIndex(0, 0));
-    QVERIFY(CellIndex("G20") == CellIndex(20, 'G'-'A'));
-    QVERIFY(CellIndex("EX10") == CellIndex(10, 153));
-    QVERIFY_EXCEPTION_THROWN(CellIndex("~EX10"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("EX10EX1"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("AAA"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("30"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("ZA#30"), std::runtime_error);
-    QVERIFY_EXCEPTION_THROWN(CellIndex("ZA30 "), std::runtime_error);
+    QCOMPARE(CellIndex("$A0"), CellIndex(0, 0));
+    QCOMPARE(CellIndex("$G20"), CellIndex(20, 'G'-'A'));
+    QCOMPARE(CellIndex("$EX10"), CellIndex(10, 153));
+    QVERIFY_EXCEPTION_THROWN(CellIndex("~$EX10"), std::runtime_error);
+    QVERIFY_EXCEPTION_THROWN(CellIndex("$EX10$EX1"), std::runtime_error);
+    QVERIFY_EXCEPTION_THROWN(CellIndex("$AAA"), std::runtime_error);
+    QVERIFY_EXCEPTION_THROWN(CellIndex("$30"), std::runtime_error);
+    QVERIFY_EXCEPTION_THROWN(CellIndex("$ZA#30"), std::runtime_error);
+    QVERIFY_EXCEPTION_THROWN(CellIndex("$ZA30 "), std::runtime_error);
+}
+
+void ParserTest::testGetDependencies()
+{
+    Expression expr;
+    std::vector<CellIndex> actual = expr.dependencies();
+    std::vector<CellIndex> expected = {};
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({4, 5, '+', 1, CellIndex(0, 1)});
+    actual = expr.dependencies();
+    expected = {CellIndex(0, 1)};
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({CellIndex(25, 1), CellIndex(31, 45), '+', 1, CellIndex(0, 1)});
+    actual = expr.dependencies();
+    expected = {CellIndex(25, 1), CellIndex(31, 45), CellIndex(0, 1)};
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({2, 3, '-', 6, 7, '+', '-'});
+    actual = expr.dependencies();
+    expected = {};
+    QCOMPARE(actual, expected);
 }
