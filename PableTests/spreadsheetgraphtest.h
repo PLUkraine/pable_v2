@@ -9,4 +9,5 @@ class SpreadsheetGraphTest : public QObject
 private Q_SLOTS:
     void testSetExpressionWithoutUpdateSimple();
     void testUpdateExpressionSimple();
+    void testUpdateExpressionWithDependencies();
 };

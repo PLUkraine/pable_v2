@@ -140,6 +140,13 @@ std::string Expression::toString(const std::vector<Token> &tokens)
     return finalStr;
 }
 
+Expression Expression::fromNumber(int number)
+{
+    Expression answer;
+    answer.setExpression({number});
+    return answer;
+}
+
 Expression Expression::fromTokens(const std::vector<Token> &tokens)
 {
     Expression answer;

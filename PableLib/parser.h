@@ -29,6 +29,7 @@ public:
 
     static std::string toString(const std::vector<Token> &tokens);
 
+    static Expression fromNumber(int number);
     static Expression fromTokens(const std::vector<Token> &tokens);
     Expression();
     Expression(const Expression &o);
