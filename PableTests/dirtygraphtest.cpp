@@ -30,12 +30,6 @@ void DirtyGraphTest::testCycleDetection()
     QCOMPARE(graph.getValue(0), 0);
     graph.addEdge(3, 1);
     QCOMPARE(graph.getValue(0), std::nullopt);
-    auto res = graph.detectForwardCycle(0);
-    auto res2 = graph.detectReverseCycle(2);
-    auto res3 = graph.detectReverseCycle(3);
-    QCOMPARE(res.size(), 3u);
-    QCOMPARE(res2.size(), 3u);
-    QCOMPARE(res3.size(), 3u);
 
     graph.clear();
     graph.addEdge(0, 1);
@@ -45,15 +39,9 @@ void DirtyGraphTest::testCycleDetection()
     graph.addEdge(4, 6);
     graph.addEdge(2, 3);
     graph.addEdge(3, 4);
-    for (int i=0; i<COUNT; ++i)
-    {
-        res = graph.detectForwardCycle(i);
-        res2 = graph.detectReverseCycle(i);
-        QVERIFY2(res.empty(), (QString::number(i) + " node").toStdString().c_str());
-        QVERIFY2(res2.empty(), (QString::number(i) + " node").toStdString().c_str());
-    }
-
-
+    auto actual = graph.getValues({0, 1, 2, 3, 4, 5, 6});
+    std::vector<std::optional<int>> expected = {0, 0, 0, 0, 0, 0, 0};
+    QCOMPARE(actual, expected);
 }
 
 void DirtyGraphTest::testLongGraphAddEdge()

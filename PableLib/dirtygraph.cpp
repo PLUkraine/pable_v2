@@ -38,8 +38,8 @@ std::optional<int> DirtyGraph::reevaluate(int where)
 
     std::vector<char> color(mCount, WHITE);
     std::vector<int> order;
-    bool canSort = topologySort(where, mForward, color, order);
-    assert(canSort);
+    auto cycleVertex = topologySort(where, mForward, color, order);
+    assert(!cycleVertex.has_value());
     for (int to : order)
     {
         updateDirectValue(to);
@@ -63,8 +63,8 @@ void DirtyGraph::reevaluateIn(const std::vector<int> &vertices, std::vector<char
     {
         if (color[v] == WHITE) {
             std::vector<int> order;
-            bool canSort = topologySort(v, mForward, color, order);
-            if (!canSort) {
+            auto cycleVertex = topologySort(v, mForward, color, order);
+            if (cycleVertex.has_value()) {
                 mValues[v] = std::nullopt;
             }
             else {
@@ -79,25 +79,6 @@ void DirtyGraph::reevaluateIn(const std::vector<int> &vertices, std::vector<char
         }
     }
 }
-
-//void DirtyGraph::addEdges(const std::vector<std::pair<int, int> > &edges)
-//{
-//    for (const auto& edge : edges)
-//    {
-//        mForward[edge.first].push_back(edge.second);
-//        mReverse[edge.second].push_back(edge.first);
-//    }
-
-//    std::vector<int> cycleVertices;
-//    std::vector<char> color(mCount, WHITE);
-//    for (const auto& edge : edges)
-//    {
-//        auto cycle = findCycle(edge.first, color, mForward);
-//        cycleVertices.insert(cycleVertices.end(), cycle.begin(), cycle.end());
-//    }
-
-//    // TODO
-//}
 
 bool DirtyGraph::setValue(int v, int value)
 {
@@ -146,64 +127,6 @@ int DirtyGraph::countDependencies(int where)
     return mForward[where].size();
 }
 
-std::vector<int> DirtyGraph::detectForwardCycle(int from)
-{
-    std::vector<char> colors(mCount, WHITE);
-    return findCycle(from, colors, mForward);
-}
-
-std::vector<int> DirtyGraph::detectReverseCycle(int from)
-{
-    std::vector<char> colors(mCount, WHITE);
-    return findCycle(from, colors, mReverse);
-}
-
-std::vector<int> DirtyGraph::findCycle(int v, std::vector<char> &colors, const std::vector<std::set<int> > &edges)
-{
-    std::vector<int> par(mCount, -1);
-    int cycleEnd = -1;
-    int cycleSt = -1;
-    std::function<bool(int)> dfs = [&](int v)
-    {
-        colors[v] = GRAY;
-        for (int to : edges[v])
-        {
-            if (colors[to] == GRAY) {
-                colors[to] = BLACK;
-                cycleEnd = v;
-                cycleSt = to;
-                return true;
-            }
-            if (colors[to] == WHITE) {
-                par[to] = v;
-                if (dfs(to)) {
-                    colors[v] = BLACK;
-                    return true;
-                }
-            }
-        }
-        colors[v] = BLACK;
-        return false;
-    };
-
-    dfs(v);
-
-    if (cycleEnd != -1)
-    {
-        std::vector<int> cycle;
-
-        while (cycleSt != cycleEnd)
-        {
-            cycle.push_back(cycleEnd);
-            cycleEnd = par[cycleEnd];
-        }
-        cycle.push_back(cycleEnd);
-
-        return cycle;
-    }
-    return {};
-}
-
 void DirtyGraph::updateDependentOn(const std::vector<int> &vertices)
 {
     // do not visit same nodes twice
@@ -230,10 +153,10 @@ void DirtyGraph::updateDependentOn(const std::vector<int> &nodes, std::vector<ch
             assert(mValues[v].has_value());
 
             std::vector<int> order;
-            bool canSort = topologySort(v, mReverse, color, order);
+            auto cycleVertex = topologySort(v, mReverse, color, order);
             std::reverse(order.begin(), order.end());
             // should be able to sort
-            assert(canSort);
+            assert(!cycleVertex.has_value());
             for (int to : order)
             {
                 // do not recompute for currentNode
@@ -263,12 +186,14 @@ std::optional<int> DirtyGraph::updateDirectValue(int where)
 
 bool DirtyGraph::handleCycleDetection(int where)
 {
-    auto cycle = detectForwardCycle(where);
-    if (!cycle.empty())
+    std::vector<char> mColor(mCount, WHITE);
+    std::vector<int> _;
+    auto cycleVertex = topologySort(where, mForward, mColor, _);
+    if (cycleVertex.has_value())
     {
         // nullopt all values dependent on cycle
-        mValues[cycle[0]] = std::nullopt;
-        updateDependentOn({cycle[0]});
+        mValues[*cycleVertex] = std::nullopt;
+        updateDependentOn({*cycleVertex});
         return false;
     }
     return true;
@@ -287,7 +212,7 @@ void DirtyGraph::errorUpdateDfs(int v,
     }
 }
 
-bool DirtyGraph::topologySort(int v,
+std::optional<int> DirtyGraph::topologySort(int v,
                               const std::vector<std::set<int> > &edges,
                               std::vector<char> &color,
                               std::vector<int>& result)
@@ -297,18 +222,19 @@ bool DirtyGraph::topologySort(int v,
     {
         if (color[to] == WHITE)
         {
-            if (!topologySort(to, edges, color, result))
+            auto cycleVertex = topologySort(to, edges, color, result);
+            if (cycleVertex.has_value())
             {
-                return false;
+                return cycleVertex;
             }
         }
         if (color[to] == GRAY)
         {
             result.clear();
-            return false;
+            return to;
         }
     }
     result.push_back(v);
     color[v] = BLACK;
-    return true;
+    return std::nullopt;
 }

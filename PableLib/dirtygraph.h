@@ -33,15 +33,11 @@ public:
     void clear();
     int countDependencies(int where);
 
-    std::vector<int> detectForwardCycle(int from);
-    std::vector<int> detectReverseCycle(int from);
-
 private:
     static const char WHITE;
     static const char GRAY;
     static const char BLACK;
 
-    std::vector<int> findCycle(int v, std::vector<char> &colors, const std::vector<std::set<int>>& edges);
     void updateDependentOn(const std::vector<int> &vertices);
     void updateDependentOn(const std::vector<int> &vertices, std::vector<char> &color);
     std::optional<int> updateDirectValue(int where);
@@ -51,9 +47,9 @@ private:
     void errorUpdateDfs(int v,
                         const std::vector<std::set<int> > &edges,
                         std::vector<char>& color);
-    bool topologySort(int v,
-                      const std::vector<std::set<int> > &edges,
-                      std::vector<char>& color,
-                      std::vector<int> &result);
+    std::optional<int> topologySort(int v,
+                                    const std::vector<std::set<int> > &edges,
+                                    std::vector<char>& color,
+                                    std::vector<int> &result);
 };
 
