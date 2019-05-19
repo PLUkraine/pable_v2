@@ -114,6 +114,55 @@ void ParserTest::testEvaluate()
     QCOMPARE(actual, expected);
 }
 
+void ParserTest::testGetResult()
+{
+    MapExpressionContext context;
+    context.map = {
+        {*CellIndex::str("$A1"), 1},
+        {*CellIndex::str("$BB3"), 10},
+    };
+
+    Expression expr;
+    std::optional<int> actual = expr.result();
+    std::optional<int> expected = 0;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({2, 3, '-', 6, 7, '+', '-'});
+    QVERIFY_EXCEPTION_THROWN(expr.result(), std::runtime_error);
+
+    expr.evaluate(context);
+    actual = expr.result();
+    expected = -14;
+    QCOMPARE(actual, expected);
+    expr.evaluate(context);
+    actual = expr.result();
+    expected = -14;
+    QCOMPARE(actual, expected);
+
+    expr.setExpression({4, 5, '+', 1, '-', *CellIndex::str("$BB3"), '+'});
+    QVERIFY_EXCEPTION_THROWN(expr.result(), std::runtime_error);
+
+    expr.evaluate(context);
+    actual = expr.result();
+    expected = 18;
+    QCOMPARE(actual, expected);
+    actual = expr.result();
+    expected = 18;
+    QCOMPARE(actual, expected);
+
+    // reval with different context
+    context.map[*CellIndex::str("$BB3")] = -1;
+    actual = expr.evaluate(context);
+    expected = 7;
+    QCOMPARE(actual, expected);
+    actual = expr.result();
+    expected = 7;
+    QCOMPARE(actual, expected);
+    actual = expr.result();
+    expected = 7;
+    QCOMPARE(actual, expected);
+}
+
 void ParserTest::testToString()
 {
     Expression expr;

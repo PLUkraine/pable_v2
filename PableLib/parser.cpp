@@ -7,15 +7,19 @@ Expression::Expression()
 {
     mRpn.emplace_back(0);
     mStr = "0";
+    mResult = 0;
+    mWasEvaluated = true;
 }
 
 void Expression::setExpression(const std::vector<Token> &rpn)
 {
     mRpn = rpn;
     mStr = toString(rpn);
+    mResult = std::nullopt;
+    mWasEvaluated = false;
 }
 
-std::optional<int> Expression::evaluate(const ExpressionContext &cellValues) const
+std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
 {
     std::vector<int> st;
     for (const auto &token : mRpn) {
@@ -24,7 +28,7 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues) con
         }
         else if (auto asOp = std::get_if<char>(&token)) {
             if (st.size() < 2)
-                return std::nullopt;
+                return setCachedResult(std::nullopt);
 
             int op2 = st.back();
             st.pop_back();
@@ -37,17 +41,24 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues) con
                 st.push_back(op1-op2);
             }
             else {
-                return std::nullopt;
+                return setCachedResult(std::nullopt);
             }
         }
         else if (auto asCell = std::get_if<CellIndex>(&token)) {
             auto val = cellValues.getValue(*asCell);
             if (!val.has_value())
-                return std::nullopt;
+                return setCachedResult(std::nullopt);
             st.push_back(*val);
         }
     }
-    return st.size() == 1 ? std::optional<int>(st.back()) : std::nullopt;
+    auto answer = st.size() == 1 ? std::optional<int>(st.back()) : std::nullopt;
+    return setCachedResult(answer);
+}
+
+std::optional<int> Expression::result() const
+{
+    if (!mWasEvaluated) throw std::runtime_error("Trying to get result of unevaluated expression");
+    return mResult;
 }
 
 std::vector<CellIndex> Expression::dependencies() const
@@ -64,6 +75,12 @@ std::vector<CellIndex> Expression::dependencies() const
 std::string Expression::toString() const
 {
     return mStr;
+}
+
+std::optional<int> Expression::setCachedResult(std::optional<int> value)
+{
+    mWasEvaluated = true;
+    return mResult = value;
 }
 
 std::string Expression::toString(const std::vector<Token> &tokens)

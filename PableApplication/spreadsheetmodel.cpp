@@ -29,7 +29,7 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
         if (it == mData.end())
             return "0";
 
-        std::optional<int> computationRes = it->second.evaluate(*NullExpressionContext::get());
+        std::optional<int> computationRes = it->second.result();
         return computationRes.has_value() ? QString::number(*computationRes)
                                           : ERROR_STR;
     }
@@ -56,6 +56,7 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
 
         auto tokens = tokenizer.tokenize(value.toString().toStdString());
         expr.setExpression(tokens);
+        expr.evaluate(*NullExpressionContext::get());
         mData[cell] = expr;
 
         return true;
