@@ -25,8 +25,14 @@ private:
     std::optional<int> mResult;
     bool mWasEvaluated;
 public:
+    friend void swap(Expression& first, Expression& second);
+
     static std::string toString(const std::vector<Token> &tokens);
     Expression();
+    Expression(const Expression &o);
+    Expression(Expression &&o);
+    Expression &operator=(Expression o);
+
     void setExpression(const std::vector<Token> &rpn);
     std::optional<int> evaluate(const ExpressionContext &cellValues);
 

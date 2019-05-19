@@ -54,10 +54,11 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
         Tokenizer tokenizer;
         Expression expr;
 
+
         auto tokens = tokenizer.tokenize(value.toString().toStdString());
         expr.setExpression(tokens);
         expr.evaluate(*NullExpressionContext::get());
-        mData[cell] = expr;
+        mData[cell] = std::move(expr);
 
         return true;
     }

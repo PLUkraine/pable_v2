@@ -2,6 +2,7 @@
 #include <cstring>
 #include <sstream>
 #include <algorithm>
+#include <QDebug>
 
 Expression::Expression()
 {
@@ -9,6 +10,26 @@ Expression::Expression()
     mStr = "0";
     mResult = 0;
     mWasEvaluated = true;
+}
+
+Expression::Expression(const Expression &o)
+{
+    mRpn = o.mRpn;
+    mStr = o.mStr;
+    mWasEvaluated = o.mWasEvaluated;
+    mResult = o.mResult;
+}
+
+Expression::Expression(Expression &&o)
+{
+    swap(*this, o);
+}
+
+Expression &Expression::operator=(Expression o)
+{
+    swap(*this, o);
+
+    return *this;
 }
 
 void Expression::setExpression(const std::vector<Token> &rpn)
@@ -81,6 +102,16 @@ std::optional<int> Expression::setCachedResult(std::optional<int> value)
 {
     mWasEvaluated = true;
     return mResult = value;
+}
+
+void swap(Expression &first, Expression &second)
+{
+    using std::swap;
+
+    first.mStr.swap(second.mStr);
+    first.mRpn.swap(second.mRpn);
+    swap(first.mResult, second.mResult);
+    swap(first.mWasEvaluated, second.mWasEvaluated);
 }
 
 std::string Expression::toString(const std::vector<Token> &tokens)
