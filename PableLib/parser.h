@@ -26,6 +26,7 @@ private:
     bool mWasEvaluated;
 public:
     friend void swap(Expression& first, Expression& second);
+    friend bool operator==(const Expression& first, const Expression& second);
 
     static std::string toString(const std::vector<Token> &tokens);
 

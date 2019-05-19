@@ -16,6 +16,7 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
     actual = graph.getValue(*CellIndex::str("$A2"));
     expected = 0;
     QCOMPARE(actual, expected);
+    QCOMPARE(Expression::fromNumber(5), graph.getExpression(*CellIndex::str("$A2")));
 
     std::vector<Token> tokensList = {
         *CellIndex::str("$A1"), *CellIndex::str("$A2"), '-'
@@ -24,6 +25,7 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
     actual = graph.getValue(*CellIndex::str("$A3"));
     expected = 0;
     QCOMPARE(actual, expected);
+    QCOMPARE(Expression::fromTokens(tokensList), graph.getExpression(*CellIndex::str("$A3")));
 
     // evaluate now
     graph.update(*CellIndex::str("$A3"));

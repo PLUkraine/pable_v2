@@ -119,6 +119,11 @@ void swap(Expression &first, Expression &second)
     swap(first.mWasEvaluated, second.mWasEvaluated);
 }
 
+bool operator==(const Expression &first, const Expression &second)
+{
+    return first.mRpn == second.mRpn;
+}
+
 std::string Expression::toString(const std::vector<Token> &tokens)
 {
     std::ostringstream result;
