@@ -17,11 +17,7 @@ private:
 public:
     SpreadsheetGraph();
     void setExpressionWithoutUpdate(const CellIndex &at, const Expression &expression);
-    void updateExpression(const CellIndex &atIndex, const Expression &expression)
-    {
-        setExpressionWithoutUpdate(atIndex, expression);
-        update(atIndex);
-    }
+    void updateExpression(const CellIndex &atIndex, const Expression &expression);
 
     void update(const CellIndex &/*atIndex*/) {}
     void updateAll() {}

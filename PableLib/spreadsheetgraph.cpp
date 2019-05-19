@@ -15,6 +15,12 @@ void SpreadsheetGraph::setExpressionWithoutUpdate(const CellIndex &at, const Exp
     createCellDepencencies(at);
 }
 
+void SpreadsheetGraph::updateExpression(const CellIndex &atIndex, const Expression &expression)
+{
+    setExpressionWithoutUpdate(atIndex, expression);
+    update(atIndex);
+}
+
 const Expression &SpreadsheetGraph::getExpression(const CellIndex &at) const
 {
     static Expression nullExpression;
@@ -43,6 +49,8 @@ void SpreadsheetGraph::createCellDepencencies(const CellIndex &at)
     auto depends = mExpr.at(at).dependencies();
     for (const auto &cell : depends)
     {
+        // TODO check if cell if in spreadsheet's bounds
+        addEdgeEntryIfNotExists(cell);
         mForward.at(at).insert(cell);
         mReverse.at(cell).insert(at);
     }
