@@ -52,14 +52,8 @@ std::optional<int> DirtyGraph::reevaluate(int where)
 void DirtyGraph::reevaluateAll()
 {
     std::vector<char> color(mCount, WHITE);
-    std::vector<int> allVertices(mCount);
-    std::iota(allVertices.begin(), allVertices.end(), 0);
-    reevaluateIn(allVertices, color);
-}
 
-void DirtyGraph::reevaluateIn(const std::vector<int> &vertices, std::vector<char> color)
-{
-    for (int v : vertices)
+    for (int v=0; v<mCount; ++v)
     {
         if (color[v] == WHITE) {
             std::vector<int> order;
@@ -74,7 +68,8 @@ void DirtyGraph::reevaluateIn(const std::vector<int> &vertices, std::vector<char
                 updateDependentOn({v});
             }
         }
-        else if (color[v] == GRAY) {
+        else if (color[v] == GRAY)
+        {
             mValues[v] = std::nullopt;
         }
     }
