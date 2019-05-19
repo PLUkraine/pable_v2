@@ -19,33 +19,49 @@ int SpreadsheetModel::columnCount(const QModelIndex &) const
 
 QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
 {
-    if (role == Qt::DisplayRole) {
-        return QString::fromStdString(CellIndex(index.row(), index.column()).toString());
-    } else if (role == Qt::EditRole) {
-        return QString("Heinrih");
+    static QString ERROR_STR = "ERROR";
+    CellIndex cell(index.row(), index.column());
+    std::unordered_map<CellIndex, std::optional<int>> values;
+
+    auto it = mData.find(cell);
+    if (role == Qt::DisplayRole)
+    {
+        if (it == mData.end())
+            return "0";
+
+        std::optional<int> computationRes = it->second.evaluate(*NullExpressionContext::get());
+        return computationRes.has_value() ? QString::number(*computationRes)
+                                          : ERROR_STR;
+    }
+    else if (role == Qt::EditRole)
+    {
+        if (it == mData.end())
+            return "0";
+
+        return QString::fromStdString(it->second.toString());
     }
 
     return QVariant();
 }
 
-//bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, int role)
-//{
-//    if (role == Qt::EditRole) {
-//        if (!checkIndex(index))
-//            return false;
-//        //save value from editor to member m_gridData
-//        m_gridData[index.row()][index.column()] = value.toString();
-//        //for presentation purposes only: build and emit a joined string
-//        QString result;
-//        for (int row = 0; row < ROWS; row++) {
-//            for (int col= 0; col < COLS; col++)
-//                result += m_gridData[row][col] + ' ';
-//        }
-//        emit editCompleted(result);
-//        return true;
-//    }
-//    return false;
-//}
+bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid()) return false;
+
+    if (role == Qt::EditRole)
+    {
+        CellIndex cell(index.row(), index.column());
+        Tokenizer tokenizer;
+        Expression expr;
+
+        auto tokens = tokenizer.tokenize(value.toString().toStdString());
+        expr.setExpression(tokens);
+        mData[cell] = expr;
+
+        return true;
+    }
+    return false;
+}
 
 QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, int role) const
 {

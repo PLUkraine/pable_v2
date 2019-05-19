@@ -3,7 +3,7 @@
 #include <vector>
 #include <variant>
 #include <unordered_map>
-#include "cellindex.h"
+#include "expressioncontext.h"
 
 using Token = std::variant<int, char, CellIndex>;
 
@@ -26,7 +26,7 @@ public:
     static std::string toString(const std::vector<Token> &tokens);
     Expression();
     void setExpression(const std::vector<Token> &rpn);
-    std::optional<int> evaluate(const std::unordered_map<CellIndex, std::optional<int>> &cellValues);
+    std::optional<int> evaluate(const ExpressionContext &cellValues) const;
     std::vector<CellIndex> dependencies() const;
     std::string toString() const;
 };

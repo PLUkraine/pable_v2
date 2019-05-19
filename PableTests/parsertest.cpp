@@ -57,58 +57,59 @@ void ParserTest::testGetDependencies()
 
 void ParserTest::testEvaluate()
 {
-    std::unordered_map<CellIndex, std::optional<int>> cellValues = {
+    MapExpressionContext context;
+    context.map = {
         {*CellIndex::str("$A1"), 1},
         {*CellIndex::str("$BB3"), 10},
     };
 
     Expression expr;
-    std::optional<int> actual = expr.evaluate(cellValues);
+    std::optional<int> actual = expr.evaluate(context);
     std::optional<int> expected = 0;
     QCOMPARE(actual, expected);
 
     expr.setExpression({2, 3, '-', 6, 7, '+', '-'});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = -14;
     QCOMPARE(actual, expected);
 
     expr.setExpression({4, 5, '+', 1, '-', *CellIndex::str("$BB3"), '+'});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = 18;
     QCOMPARE(actual, expected);
 
     expr.setExpression({4});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = 4;
     QCOMPARE(actual, expected);
 
     expr.setExpression({9, 2});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     expr.setExpression({});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     expr.setExpression({9, '+', '-'});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     expr.setExpression({9, 2, '$'});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     expr.setExpression({9, *CellIndex::str("$AA2"), '-'});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     expr.setExpression({9, 6, '-', '-'});
-    actual = expr.evaluate(cellValues);
+    actual = expr.evaluate(context);
     expected = std::nullopt;
     QCOMPARE(actual, expected);
 }

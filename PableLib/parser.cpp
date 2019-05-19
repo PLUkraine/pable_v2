@@ -15,7 +15,7 @@ void Expression::setExpression(const std::vector<Token> &rpn)
     mStr = toString(rpn);
 }
 
-std::optional<int> Expression::evaluate(const std::unordered_map<CellIndex, std::optional<int>> &cellValues)
+std::optional<int> Expression::evaluate(const ExpressionContext &cellValues) const
 {
     std::vector<int> st;
     for (const auto &token : mRpn) {
@@ -41,11 +41,10 @@ std::optional<int> Expression::evaluate(const std::unordered_map<CellIndex, std:
             }
         }
         else if (auto asCell = std::get_if<CellIndex>(&token)) {
-            auto it = cellValues.find(*asCell);
-            if (it == cellValues.end() || !it->second.has_value()) {
+            auto val = cellValues.getValue(*asCell);
+            if (!val.has_value())
                 return std::nullopt;
-            }
-            st.push_back(*(it->second));
+            st.push_back(*val);
         }
     }
     return st.size() == 1 ? std::optional<int>(st.back()) : std::nullopt;
