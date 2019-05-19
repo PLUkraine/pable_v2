@@ -9,12 +9,12 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
 
     graph.setExpressionWithoutUpdate(*CellIndex::str("$A1"), Expression::fromNumber(2));
     auto actual = graph.getValue(*CellIndex::str("$A1"));
-    std::optional<int> expected = 0;
+    std::optional<int> expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     graph.setExpressionWithoutUpdate(*CellIndex::str("$A2"), Expression::fromNumber(5));
     actual = graph.getValue(*CellIndex::str("$A2"));
-    expected = 0;
+    expected = std::nullopt;
     QCOMPARE(actual, expected);
     QCOMPARE(Expression::fromNumber(5), graph.getExpression(*CellIndex::str("$A2")));
 
@@ -23,7 +23,7 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
     };
     graph.setExpressionWithoutUpdate(*CellIndex::str("$A3"), Expression::fromTokens(tokensList));
     actual = graph.getValue(*CellIndex::str("$A3"));
-    expected = 0;
+    expected = std::nullopt;
     QCOMPARE(actual, expected);
     QCOMPARE(Expression::fromTokens(tokensList), graph.getExpression(*CellIndex::str("$A3")));
 
@@ -39,7 +39,7 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
     };
     graph.setExpressionWithoutUpdate(*CellIndex::str("$A3"), Expression::fromTokens(tokensList));
     actual = graph.getValue(*CellIndex::str("$A3"));
-    expected = -3;
+    expected = std::nullopt;
     QCOMPARE(actual, expected);
 
     // reevaluate now
