@@ -1,7 +1,6 @@
 #include <QtTest>
 
 #include "parsertest.h"
-#include "dirtygraphtest.h"
 
 
 int main(int argc, char** argv)
@@ -13,7 +12,6 @@ int main(int argc, char** argv)
    };
 
    ASSERT_TEST(new ParserTest());
-   ASSERT_TEST(new DirtyGraphTest());
 
    return status;
 }

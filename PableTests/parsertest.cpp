@@ -163,6 +163,28 @@ void ParserTest::testGetResult()
     QCOMPARE(actual, expected);
 }
 
+void ParserTest::testCopying()
+{
+    const ExpressionContext &context = *NullExpressionContext::get();
+
+    Expression e1;
+    e1.setExpression({10, 5, '+'});
+
+    Expression e2(e1);
+    QCOMPARE(e1.wasEvaluated(), e2.wasEvaluated());
+    QCOMPARE(e1.toString(), e2.toString());
+    e1.evaluate(context);
+    QVERIFY(e1.wasEvaluated() != e2.wasEvaluated());
+    e2.evaluate(context);
+    QCOMPARE(e1.wasEvaluated(), e2.wasEvaluated());
+    QCOMPARE(e1.result(), e2.result());
+
+    e1.setExpression({9});
+    e1.evaluate(context);
+    QCOMPARE(e1.result(), 9);
+    QCOMPARE(e2.result(), 15);
+}
+
 void ParserTest::testToString()
 {
     Expression expr;

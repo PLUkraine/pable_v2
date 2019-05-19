@@ -76,6 +76,11 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
     return setCachedResult(answer);
 }
 
+bool Expression::wasEvaluated() const
+{
+    return mWasEvaluated;
+}
+
 std::optional<int> Expression::result() const
 {
     if (!mWasEvaluated) throw std::runtime_error("Trying to get result of unevaluated expression");

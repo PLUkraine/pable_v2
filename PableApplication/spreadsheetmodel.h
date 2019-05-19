@@ -2,7 +2,7 @@
 
 #include <QAbstractTableModel>
 #include "unordered_map"
-#include "parser.h"
+#include "spreadsheetgraph.h"
 
 class SpreadsheetModel : public QAbstractTableModel
 {
@@ -17,5 +17,5 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 private:
-    std::unordered_map<CellIndex, Expression> mData;
+    SpreadsheetGraph mGraph;
 };

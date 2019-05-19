@@ -20,26 +20,16 @@ int SpreadsheetModel::columnCount(const QModelIndex &) const
 QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
 {
     static QString ERROR_STR = "ERROR";
-    CellIndex cell(index.row(), index.column());
-    std::unordered_map<CellIndex, std::optional<int>> values;
 
-    auto it = mData.find(cell);
+    CellIndex cell(index.row(), index.column());
     if (role == Qt::DisplayRole)
     {
-        if (it == mData.end())
-            return "0";
-
-        std::optional<int> computationRes = it->second.result();
+        auto computationRes = mGraph.getValue(cell);
         return computationRes.has_value() ? QString::number(*computationRes)
                                           : ERROR_STR;
     }
     else if (role == Qt::EditRole)
-    {
-        if (it == mData.end())
-            return "0";
-
-        return QString::fromStdString(it->second.toString());
-    }
+        return QString::fromStdString(mGraph.getExpression(cell).toString());
 
     return QVariant();
 }
@@ -54,11 +44,9 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
         Tokenizer tokenizer;
         Expression expr;
 
-
         auto tokens = tokenizer.tokenize(value.toString().toStdString());
         expr.setExpression(tokens);
-        expr.evaluate(*NullExpressionContext::get());
-        mData[cell] = std::move(expr);
+        mGraph.setExpression(cell, std::move(expr));
 
         return true;
     }

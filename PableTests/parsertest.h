@@ -12,6 +12,7 @@ private Q_SLOTS:
     void testGetDependencies();
     void testEvaluate();
     void testGetResult();
+    void testCopying();
     void testToString();
 
     void testTokenizer();
