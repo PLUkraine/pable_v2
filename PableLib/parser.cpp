@@ -140,6 +140,13 @@ std::string Expression::toString(const std::vector<Token> &tokens)
     return finalStr;
 }
 
+Expression Expression::fromTokens(const std::vector<Token> &tokens)
+{
+    Expression answer;
+    answer.setExpression(tokens);
+    return answer;
+}
+
 std::vector<Token> Tokenizer::tokenize(const std::string &str) const
 {
     std::stringstream ss(str);

@@ -28,6 +28,8 @@ public:
     friend void swap(Expression& first, Expression& second);
 
     static std::string toString(const std::vector<Token> &tokens);
+
+    static Expression fromTokens(const std::vector<Token> &tokens);
     Expression();
     Expression(const Expression &o);
     Expression(Expression &&o);

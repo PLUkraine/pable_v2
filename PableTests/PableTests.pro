@@ -9,6 +9,7 @@ include(../common.pri)
 TEMPLATE = app
 
 SOURCES += \
+    spreadsheetgraphtest.cpp \
     testmain.cpp \
     parsertest.cpp \
     testutils.cpp
@@ -27,4 +28,5 @@ else:unix: PRE_TARGETDEPS += $$OUT_PWD/../PableLib/libPableLib.a
 
 HEADERS += \
     parsertest.h \
+    spreadsheetgraphtest.h \
     testutils.h

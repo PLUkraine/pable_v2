@@ -9,7 +9,12 @@ class SpreadsheetGraph
 {
 public:
     SpreadsheetGraph();
-    void setExpression(const CellIndex &/*atIndex*/, const Expression &/*expression*/) {}
+    void setExpressionWithoutUpdate(const CellIndex &/*atIndex*/, const Expression &/*expression*/) {}
+    void updateExpression(const CellIndex &atIndex, const Expression &expression)
+    {
+        setExpressionWithoutUpdate(atIndex, expression);
+        update(atIndex);
+    }
 
     void update(const CellIndex &/*atIndex*/) {}
     void updateAll() {}

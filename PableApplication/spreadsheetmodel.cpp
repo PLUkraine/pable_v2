@@ -45,8 +45,7 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
         Expression expr;
 
         auto tokens = tokenizer.tokenize(value.toString().toStdString());
-        expr.setExpression(tokens);
-        mGraph.setExpression(cell, std::move(expr));
+        mGraph.updateExpression(cell, Expression::fromTokens(tokens));
 
         return true;
     }

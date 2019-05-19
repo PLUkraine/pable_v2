@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "parsertest.h"
+#include "spreadsheetgraphtest.h"
 
 
 int main(int argc, char** argv)
@@ -12,6 +13,7 @@ int main(int argc, char** argv)
    };
 
    ASSERT_TEST(new ParserTest());
+   ASSERT_TEST(new SpreadsheetGraphTest());
 
    return status;
 }
