@@ -76,6 +76,14 @@ void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
     }
 }
 
+GraphCondensation::GraphCondensation(const SpreadsheetGraph::EdgeList &forward,
+                                     const SpreadsheetGraph::EdgeList &reverse)
+    : mForward(forward),
+      mReverse(reverse)
+{
+
+}
+
 GraphCondensation::Result GraphCondensation::condenceFromVertex(const CellIndex &start)
 {
     // sort in order
@@ -98,12 +106,30 @@ GraphCondensation::Result GraphCondensation::condenceFromVertex(const CellIndex 
     return result;
 }
 
-void GraphCondensation::dfsTopologicalSort(const CellIndex &/*v*/, std::vector<CellIndex> &/*order*/)
+void GraphCondensation::dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order)
 {
-    return;
+    mUsed[v] = true;
+    if (mForward.find(v) != mForward.end())
+    {
+        for (const auto &to : mForward.at(v))
+        {
+            if (!mUsed[to])
+                dfsTopologicalSort(to, order);
+        }
+    }
+    order.push_back(v);
 }
 
-void GraphCondensation::dfsCondense(const CellIndex &/*v*/, GraphCondensation::Result &/*result*/, int /*componentNum*/)
+void GraphCondensation::dfsCondense(const CellIndex &v, GraphCondensation::Result &result, int componentNum)
 {
-    return;
+    mUsed[v] = true;
+    result.components[componentNum].insert(v);
+    if (mReverse.find(v) != mReverse.end())
+    {
+        for (const auto &to : mReverse.at(v))
+        {
+            if (!mUsed[to])
+                dfsCondense(to, result, componentNum);
+        }
+    }
 }

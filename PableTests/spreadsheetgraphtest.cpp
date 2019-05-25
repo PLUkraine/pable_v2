@@ -16,6 +16,20 @@ SpreadsheetGraph::EdgeList SpreadsheetGraphTest::getReverse(const SpreadsheetGra
     return reverse;
 }
 
+void SpreadsheetGraphTest::verifyCondensation(const std::vector<std::unordered_set<CellIndex>> &actual,
+                                              const std::vector<std::unordered_set<CellIndex>> &expected)
+{
+    QCOMPARE(actual.size(), expected.size());
+
+    for (auto actualSet : actual) {
+        auto it = std::find(expected.begin(), expected.end(), actualSet);
+        if (it == actual.end()) {
+            const auto message = toString(actualSet) + " is not in the expected set";
+            QFAIL(message.c_str());
+        }
+    }
+}
+
 void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
 {
     SpreadsheetGraph graph;
@@ -212,4 +226,33 @@ void SpreadsheetGraphTest::testGetReverse()
     };
     reverse = getReverse(forward);
     QCOMPARE(reverse, expected);
+}
+
+void SpreadsheetGraphTest::testGraphCondensationSimple()
+{
+    SpreadsheetGraph::EdgeList forward = {
+        {CellIndex(0, 1), {
+            CellIndex(0, 2),
+            CellIndex(0, 3),
+        }},
+    };
+    auto reverse = getReverse(forward);
+
+    GraphCondensation condensation(forward, reverse);
+    auto result = condensation.condenceFromVertex(CellIndex(0, 1));
+    verifyCondensation(result.components, {
+                           {CellIndex(0, 1)},
+                           {CellIndex(0, 2)},
+                           {CellIndex(0, 3)},
+                       });
+}
+
+std::string toString(const std::unordered_set<CellIndex> &v)
+{
+    std::string res;
+    for (const auto &c : v) {
+        res += c.toString();
+        res += " ";
+    }
+    return res;
 }
