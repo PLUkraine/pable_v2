@@ -103,6 +103,7 @@ void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
 {
     if (mForward.find(at) == mForward.end()) {
         mAllVertices.insert(at);
+        mExpr.insert({at, Expression()});
         mForward.insert(std::make_pair(at, std::unordered_set<CellIndex>()));
     }
     if (mReverse.find(at) == mReverse.end()) {
