@@ -16,6 +16,17 @@ SpreadsheetGraph::EdgeList SpreadsheetGraphTest::getReverse(const SpreadsheetGra
     return reverse;
 }
 
+SpreadsheetGraph::VertexSet SpreadsheetGraphTest::extractAllVertices(const SpreadsheetGraph::EdgeList &forward)
+{
+    SpreadsheetGraph::VertexSet answer;
+    for (const auto entry : forward)
+    {
+        answer.insert(entry.first);
+        answer.insert(entry.second.begin(), entry.second.end());
+    }
+    return answer;
+}
+
 void SpreadsheetGraphTest::verifyCondensation(const std::vector<std::unordered_set<CellIndex>> &actual,
                                               const std::vector<std::unordered_set<CellIndex>> &expected)
 {
@@ -230,6 +241,8 @@ void SpreadsheetGraphTest::testGetReverse()
 
 void SpreadsheetGraphTest::testGraphCondensationSimple()
 {
+    GraphCondensation condensation;
+
     SpreadsheetGraph::EdgeList forward = {
         {CellIndex(0, 1), {
             CellIndex(0, 2),
@@ -237,13 +250,32 @@ void SpreadsheetGraphTest::testGraphCondensationSimple()
         }},
     };
     auto reverse = getReverse(forward);
-
-    GraphCondensation condensation(forward, reverse);
-    auto result = condensation.condenceFromVertex(CellIndex(0, 1));
+    auto vertices = extractAllVertices(forward);
+    auto result = condensation.perform(vertices, forward, reverse);
     verifyCondensation(result.components, {
                            {CellIndex(0, 1)},
                            {CellIndex(0, 2)},
                            {CellIndex(0, 3)},
+                       });
+
+    forward = {
+        {CellIndex(0, 1), {
+             CellIndex(0, 2),
+         }},
+        {CellIndex(0, 2), {
+             CellIndex(0, 3),
+         }},
+        {CellIndex(0, 3), {
+             CellIndex(0, 2),
+             CellIndex(0, 4)
+         }},
+    };
+    reverse = getReverse(forward);
+    result = condensation.perform(vertices, forward, reverse);
+    verifyCondensation(result.components, {
+                           {CellIndex(0, 1)},
+                           {CellIndex(0, 2), CellIndex(0, 3)},
+                           {CellIndex(0, 4)},
                        });
 }
 

@@ -69,6 +69,7 @@ void SpreadsheetGraph::purgeCellDependencies(const CellIndex &at)
 void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
 {
     if (mForward.find(at) == mForward.end()) {
+        mAllVertices.insert(at);
         mForward.insert(std::make_pair(at, std::unordered_set<CellIndex>()));
     }
     if (mReverse.find(at) == mReverse.end()) {
@@ -76,20 +77,19 @@ void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
     }
 }
 
-GraphCondensation::GraphCondensation(const SpreadsheetGraph::EdgeList &forward,
-                                     const SpreadsheetGraph::EdgeList &reverse)
-    : mForward(forward),
-      mReverse(reverse)
+GraphCondensation::Result GraphCondensation::perform(const SpreadsheetGraph::VertexSet &allVertices,
+                                                     const SpreadsheetGraph::EdgeList &forward,
+                                                     const SpreadsheetGraph::EdgeList &reverse)
 {
+    mForward = &forward;
+    mReverse = &reverse;
 
-}
-
-GraphCondensation::Result GraphCondensation::condenceFromVertex(const CellIndex &start)
-{
     // sort in order
     mUsed.clear();
     std::vector<CellIndex> order;
-    dfsTopologicalSort(start, order);
+    for (const auto &v : allVertices)
+        if (!mUsed[v])
+            dfsTopologicalSort(v, order);
 
     // visit reversed graph
     int curComponentNum = 0;
@@ -103,15 +103,17 @@ GraphCondensation::Result GraphCondensation::condenceFromVertex(const CellIndex 
         }
     }
 
+    mForward = nullptr;
+    mReverse = nullptr;
     return result;
 }
 
 void GraphCondensation::dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order)
 {
     mUsed[v] = true;
-    if (mForward.find(v) != mForward.end())
+    if (mForward->find(v) != mForward->end())
     {
-        for (const auto &to : mForward.at(v))
+        for (const auto &to : mForward->at(v))
         {
             if (!mUsed[to])
                 dfsTopologicalSort(to, order);
@@ -124,9 +126,9 @@ void GraphCondensation::dfsCondense(const CellIndex &v, GraphCondensation::Resul
 {
     mUsed[v] = true;
     result.components[componentNum].insert(v);
-    if (mReverse.find(v) != mReverse.end())
+    if (mReverse->find(v) != mReverse->end())
     {
-        for (const auto &to : mReverse.at(v))
+        for (const auto &to : mReverse->at(v))
         {
             if (!mUsed[to])
                 dfsCondense(to, result, componentNum);

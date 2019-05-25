@@ -10,8 +10,10 @@ class SpreadsheetGraph
 {
 public:
     using EdgeList = std::unordered_map<CellIndex, std::unordered_set<CellIndex>>;
+    using VertexSet = std::unordered_set<CellIndex>;
 private:
     std::unordered_map<CellIndex, Expression> mExpr;
+    VertexSet mAllVertices;
     EdgeList mForward;
     EdgeList mReverse;
 
@@ -35,10 +37,10 @@ private:
 class GraphCondensation
 {
 private:
-    using UsedVec = std::unordered_map<CellIndex, bool>;
-    UsedVec mUsed;
-    const SpreadsheetGraph::EdgeList &mForward;
-    const SpreadsheetGraph::EdgeList &mReverse;
+    std::unordered_map<CellIndex, bool> mUsed;
+
+    SpreadsheetGraph::EdgeList const *mForward;
+    SpreadsheetGraph::EdgeList const *mReverse;
 
 public:
     struct Result
@@ -46,9 +48,9 @@ public:
         std::vector<std::unordered_set<CellIndex>> components;
     };
 
-    GraphCondensation(const SpreadsheetGraph::EdgeList &forward,
-                      const SpreadsheetGraph::EdgeList &reverse);
-    Result condenceFromVertex(const CellIndex &start);
+    Result perform(const SpreadsheetGraph::VertexSet &allVertices,
+                   const SpreadsheetGraph::EdgeList &forward,
+                   const SpreadsheetGraph::EdgeList &reverse);
 
 private:
     void dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order);
