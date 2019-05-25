@@ -80,6 +80,21 @@ bool SpreadsheetGraph::hasCell(const CellIndex &at) const
     return mExpr.find(at) != mExpr.end();
 }
 
+void SpreadsheetGraph::clear(const CellIndex &at)
+{
+    if (!hasCell(at)) return;
+
+    purgeCellDependencies(at);
+    mExpr[at] = Expression();
+    if (mReverse.at(at).empty()) {
+        mAllVertices.erase(at);
+        mExpr.erase(at);
+        mForward.erase(at);
+        mReverse.erase(at);
+    }
+    updateAll();
+}
+
 void SpreadsheetGraph::createCellDepencencies(const CellIndex &at)
 {
     addEdgeEntryIfNotExists(at);

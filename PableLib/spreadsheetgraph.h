@@ -27,6 +27,7 @@ public:
     const Expression &getExpression(const CellIndex &at) const;
     std::optional<int> getValue(const CellIndex &at) const;
     bool hasCell(const CellIndex &at) const;
+    void clear(const CellIndex &at);
 
 private:
     void createCellDepencencies(const CellIndex &at);

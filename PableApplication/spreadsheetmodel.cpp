@@ -45,7 +45,7 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
     {
         CellIndex cell(index.row(), index.column());
         if (value.toString().isEmpty()) {
-            mGraph.updateExpression(cell, Expression());
+            mGraph.clear(cell);
             return true;
         }
 
