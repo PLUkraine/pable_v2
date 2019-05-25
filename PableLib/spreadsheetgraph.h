@@ -8,8 +8,9 @@
 // interface first...
 class SpreadsheetGraph
 {
-private:
+public:
     using EdgeList = std::unordered_map<CellIndex, std::unordered_set<CellIndex>>;
+private:
     std::unordered_map<CellIndex, Expression> mExpr;
     EdgeList mForward;
     EdgeList mReverse;
@@ -29,6 +30,29 @@ private:
     void createCellDepencencies(const CellIndex &at);
     void purgeCellDependencies(const CellIndex &at);
     void addEdgeEntryIfNotExists(const CellIndex &at);
+};
+
+class GraphCondensation
+{
+private:
+    using UsedVec = std::unordered_map<CellIndex, bool>;
+    UsedVec mUsed;
+    const SpreadsheetGraph::EdgeList &mForward;
+    const SpreadsheetGraph::EdgeList &mReverse;
+
+public:
+    struct Result
+    {
+        std::vector<std::unordered_set<CellIndex>> components;
+    };
+
+    GraphCondensation(const SpreadsheetGraph::EdgeList &forward,
+                      const SpreadsheetGraph::EdgeList &reverse);
+    Result condenceFromVertex(const CellIndex &start);
+
+private:
+    void dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order);
+    void dfsCondense(const CellIndex &v, Result &result, int componentNum);
 };
 
 #endif // SPREADSHEETGRAPH_H

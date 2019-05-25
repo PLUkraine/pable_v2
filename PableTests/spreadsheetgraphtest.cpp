@@ -1,7 +1,20 @@
 #include "spreadsheetgraphtest.h"
-#include "spreadsheetgraph.h"
 #include "testutils.h"
 
+
+SpreadsheetGraph::EdgeList SpreadsheetGraphTest::getReverse(const SpreadsheetGraph::EdgeList &forward)
+{
+    SpreadsheetGraph::EdgeList reverse;
+    for (auto it : forward)
+    {
+        CellIndex v = it.first;
+        for (auto to : it.second)
+        {
+            reverse[to].insert(v);
+        }
+    }
+    return reverse;
+}
 
 void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
 {
@@ -150,4 +163,53 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     actual = graph.getValue(*CellIndex::str("$A5"));
     expected = -4;
     QCOMPARE(actual, expected);
+}
+
+void SpreadsheetGraphTest::testGetReverse()
+{
+    SpreadsheetGraph::EdgeList forward = {
+        {CellIndex(0, 1), {
+            CellIndex(0, 2),
+            CellIndex(0, 3),
+        }},
+    };
+    SpreadsheetGraph::EdgeList reverse = getReverse(forward);
+    SpreadsheetGraph::EdgeList expected = {
+        {CellIndex(0, 2), {
+             CellIndex(0, 1),
+         }},
+
+         {CellIndex(0, 3), {
+              CellIndex(0, 1),
+          }},
+    };
+
+    forward = {
+        {CellIndex(0, 1), {
+             CellIndex(0, 2),
+             CellIndex(0, 4),
+         }},
+        {CellIndex(0, 2), {
+             CellIndex(0, 3),
+             CellIndex(0, 4),
+         }},
+        {CellIndex(0, 4), {
+            CellIndex(0, 2),
+         }},
+    };
+    expected = {
+        {CellIndex(0, 2), {
+             CellIndex(0, 1),
+             CellIndex(0, 4)
+         }},
+        {CellIndex(0, 4), {
+             CellIndex(0, 1),
+             CellIndex(0, 2),
+         }},
+        {CellIndex(0, 3), {
+            CellIndex(0, 2),
+         }},
+    };
+    reverse = getReverse(forward);
+    QCOMPARE(reverse, expected);
 }

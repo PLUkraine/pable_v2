@@ -75,3 +75,35 @@ void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
         mReverse.insert(std::make_pair(at, std::unordered_set<CellIndex>()));
     }
 }
+
+GraphCondensation::Result GraphCondensation::condenceFromVertex(const CellIndex &start)
+{
+    // sort in order
+    mUsed.clear();
+    std::vector<CellIndex> order;
+    dfsTopologicalSort(start, order);
+
+    // visit reversed graph
+    int curComponentNum = 0;
+    mUsed.clear();
+    Result result;
+    for (auto it = order.rbegin(); it != order.rend(); ++it)
+    {
+        if (!mUsed[*it]) {
+            result.components.emplace_back();
+            dfsCondense(*it, result, curComponentNum++);
+        }
+    }
+
+    return result;
+}
+
+void GraphCondensation::dfsTopologicalSort(const CellIndex &/*v*/, std::vector<CellIndex> &/*order*/)
+{
+    return;
+}
+
+void GraphCondensation::dfsCondense(const CellIndex &/*v*/, GraphCondensation::Result &/*result*/, int /*componentNum*/)
+{
+    return;
+}
