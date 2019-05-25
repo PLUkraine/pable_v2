@@ -75,6 +75,11 @@ std::optional<int> SpreadsheetGraph::getValue(const CellIndex &at) const
     return expr.result();
 }
 
+bool SpreadsheetGraph::hasCell(const CellIndex &at) const
+{
+    return mExpr.find(at) != mExpr.end();
+}
+
 void SpreadsheetGraph::createCellDepencencies(const CellIndex &at)
 {
     addEdgeEntryIfNotExists(at);

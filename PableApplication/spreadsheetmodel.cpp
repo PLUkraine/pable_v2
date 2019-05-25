@@ -24,6 +24,9 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
     CellIndex cell(index.row(), index.column());
     if (role == Qt::DisplayRole)
     {
+        if (!mGraph.hasCell(cell))
+            return "";
+
         auto computationRes = mGraph.getValue(cell);
         return computationRes.has_value() ? QString::number(*computationRes)
                                           : ERROR_STR;
@@ -41,6 +44,11 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
     if (role == Qt::EditRole)
     {
         CellIndex cell(index.row(), index.column());
+        if (value.toString().isEmpty()) {
+            mGraph.updateExpression(cell, Expression());
+            return true;
+        }
+
         Tokenizer tokenizer;
         Expression expr;
 
