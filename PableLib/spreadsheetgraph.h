@@ -4,13 +4,13 @@
 #include <unordered_set>
 #include "parser.h"
 
-
 // interface first...
-class SpreadsheetGraph
+class SpreadsheetGraph : public ExpressionContext
 {
 public:
     using EdgeList = std::unordered_map<CellIndex, std::unordered_set<CellIndex>>;
     using VertexSet = std::unordered_set<CellIndex>;
+    using UsedMap = std::unordered_map<CellIndex, bool>;
 private:
     std::unordered_map<CellIndex, Expression> mExpr;
     VertexSet mAllVertices;
@@ -22,8 +22,7 @@ public:
     void setExpressionWithoutUpdate(const CellIndex &at, const Expression &expression);
     void updateExpression(const CellIndex &atIndex, const Expression &expression);
 
-    void update(const CellIndex &/*atIndex*/) {}
-    void updateAll() {}
+    void updateAll();
 
     const Expression &getExpression(const CellIndex &at) const;
     std::optional<int> getValue(const CellIndex &at) const;
@@ -32,6 +31,8 @@ private:
     void createCellDepencencies(const CellIndex &at);
     void purgeCellDependencies(const CellIndex &at);
     void addEdgeEntryIfNotExists(const CellIndex &at);
+
+    void propagateErrorDfs(const CellIndex &at, UsedMap &used);
 };
 
 class GraphCondensation
@@ -43,18 +44,18 @@ private:
     SpreadsheetGraph::EdgeList const *mReverse;
 
 public:
-    struct Result
-    {
-        std::vector<std::unordered_set<CellIndex>> components;
-    };
+    using ComponentsList = std::vector<std::unordered_set<CellIndex>>;
 
-    Result perform(const SpreadsheetGraph::VertexSet &allVertices,
-                   const SpreadsheetGraph::EdgeList &forward,
-                   const SpreadsheetGraph::EdgeList &reverse);
+    ComponentsList condensate(const SpreadsheetGraph::VertexSet &allVertices,
+                              const SpreadsheetGraph::EdgeList &forward,
+                              const SpreadsheetGraph::EdgeList &reverse);
+    std::vector<CellIndex> topologicalSort(const SpreadsheetGraph::VertexSet &allVertices,
+                                           const SpreadsheetGraph::EdgeList &edges);
+    bool isDAG(const ComponentsList &strongComponents) const;
 
 private:
     void dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order);
-    void dfsCondense(const CellIndex &v, Result &result, int componentNum);
+    void dfsCondense(const CellIndex &v, ComponentsList &result, int componentNum);
 };
 
 #endif // SPREADSHEETGRAPH_H

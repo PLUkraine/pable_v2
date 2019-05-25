@@ -18,7 +18,40 @@ void SpreadsheetGraph::setExpressionWithoutUpdate(const CellIndex &at, const Exp
 void SpreadsheetGraph::updateExpression(const CellIndex &atIndex, const Expression &expression)
 {
     setExpressionWithoutUpdate(atIndex, expression);
-    update(atIndex);
+    updateAll();
+}
+
+void SpreadsheetGraph::updateAll()
+{
+    auto isSetSingleton = [](const std::unordered_set<CellIndex> &comp) {
+        return comp.size() == 1;
+    };
+
+    GraphCondensation condensation;
+    auto strongComponents = condensation.condensate(mAllVertices, mForward, mReverse);
+    auto compEnd = std::remove_if(strongComponents.begin(), strongComponents.end(), isSetSingleton);
+
+    // no cycles
+    if (compEnd == strongComponents.begin())
+    {
+        // get global sort order and reevaluate ENTIRE graph
+        auto order = condensation.topologicalSort(mAllVertices, mForward);
+        for (auto it = order.rbegin(); it != order.rend(); ++it)
+        {
+            mExpr.at(*it).evaluate(*this);
+        }
+    }
+    // there are cycles!
+    else
+    {
+        // propagate error using reverse graph
+        UsedMap used;
+        for (auto it = strongComponents.begin(); it != compEnd; ++it)
+        {
+            auto anyCycleVertex = *it->begin();
+            propagateErrorDfs(anyCycleVertex, used);
+        }
+    }
 }
 
 const Expression &SpreadsheetGraph::getExpression(const CellIndex &at) const
@@ -77,7 +110,18 @@ void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
     }
 }
 
-GraphCondensation::Result GraphCondensation::perform(const SpreadsheetGraph::VertexSet &allVertices,
+void SpreadsheetGraph::propagateErrorDfs(const CellIndex &at, UsedMap &used)
+{
+    used[at] = true;
+    mExpr.at(at).setError();
+    for (const auto &to : mReverse.at(at))
+    {
+        if (!used[to])
+            propagateErrorDfs(to, used);
+    }
+}
+
+GraphCondensation::ComponentsList GraphCondensation::condensate(const SpreadsheetGraph::VertexSet &allVertices,
                                                      const SpreadsheetGraph::EdgeList &forward,
                                                      const SpreadsheetGraph::EdgeList &reverse)
 {
@@ -94,11 +138,11 @@ GraphCondensation::Result GraphCondensation::perform(const SpreadsheetGraph::Ver
     // visit reversed graph
     int curComponentNum = 0;
     mUsed.clear();
-    Result result;
+    ComponentsList result;
     for (auto it = order.rbegin(); it != order.rend(); ++it)
     {
         if (!mUsed[*it]) {
-            result.components.emplace_back();
+            result.emplace_back();
             dfsCondense(*it, result, curComponentNum++);
         }
     }
@@ -106,6 +150,30 @@ GraphCondensation::Result GraphCondensation::perform(const SpreadsheetGraph::Ver
     mForward = nullptr;
     mReverse = nullptr;
     return result;
+}
+
+std::vector<CellIndex> GraphCondensation::topologicalSort(const SpreadsheetGraph::VertexSet &allVertices,
+                                                          const SpreadsheetGraph::EdgeList &edges)
+{
+    mForward = &edges;
+    mUsed.clear();
+
+    std::vector<CellIndex> order;
+    for (const auto &v : allVertices) {
+        if (!mUsed[v])
+            dfsTopologicalSort(v, order);
+    }
+    std::reverse(order.begin(), order.end());
+
+    mForward = nullptr;
+    return order;
+}
+
+bool GraphCondensation::isDAG(const GraphCondensation::ComponentsList &strongComponents) const
+{
+    return std::all_of(strongComponents.begin(), strongComponents.end(), [](const std::unordered_set<CellIndex> &s) {
+        return s.size() == 1;
+    });
 }
 
 void GraphCondensation::dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order)
@@ -122,10 +190,10 @@ void GraphCondensation::dfsTopologicalSort(const CellIndex &v, std::vector<CellI
     order.push_back(v);
 }
 
-void GraphCondensation::dfsCondense(const CellIndex &v, GraphCondensation::Result &result, int componentNum)
+void GraphCondensation::dfsCondense(const CellIndex &v, ComponentsList &result, int componentNum)
 {
     mUsed[v] = true;
-    result.components[componentNum].insert(v);
+    result[componentNum].insert(v);
     if (mReverse->find(v) != mReverse->end())
     {
         for (const auto &to : mReverse->at(v))

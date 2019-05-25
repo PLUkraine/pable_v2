@@ -39,6 +39,7 @@ public:
 
     void setExpression(const std::vector<Token> &rpn);
     std::optional<int> evaluate(const ExpressionContext &cellValues);
+    std::optional<int> setError();
 
     bool wasEvaluated() const;
     std::optional<int> result() const;

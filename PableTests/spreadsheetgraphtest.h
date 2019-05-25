@@ -23,4 +23,6 @@ private Q_SLOTS:
 
     void testGetReverse();
     void testGraphCondensationSimple();
+    void testTopologicalSorting();
+    void testIsDAG();
 };

@@ -15,3 +15,8 @@ QDebug operator<<(QDebug d, const std::optional<int> &v) {
     d << (v.has_value() ? QString::number(*v) : NULLOPT);
     return d;
 }
+
+QDebug operator<<(QDebug d, const CellIndex &v) {
+    d << v.row() << ";" << v.col();
+    return d;
+}

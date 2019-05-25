@@ -1,7 +1,6 @@
 #include "spreadsheetgraphtest.h"
 #include "testutils.h"
 
-
 SpreadsheetGraph::EdgeList SpreadsheetGraphTest::getReverse(const SpreadsheetGraph::EdgeList &forward)
 {
     SpreadsheetGraph::EdgeList reverse;
@@ -66,7 +65,7 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
     QCOMPARE(Expression::fromTokens(tokensList), graph.getExpression(*CellIndex::str("$A3")));
 
     // evaluate now
-    graph.update(*CellIndex::str("$A3"));
+    graph.updateAll();
     actual = graph.getValue(*CellIndex::str("$A3"));
     expected = -3;
     QCOMPARE(actual, expected);
@@ -81,7 +80,7 @@ void SpreadsheetGraphTest::testSetExpressionWithoutUpdateSimple()
     QCOMPARE(actual, expected);
 
     // reevaluate now
-    graph.update(*CellIndex::str("$A3"));
+    graph.updateAll();
     actual = graph.getValue(*CellIndex::str("$A3"));
     expected = 7;
     QCOMPARE(actual, expected);
@@ -179,7 +178,7 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     expected = 2;
     QCOMPARE(actual, expected);
     actual = graph.getValue(*CellIndex::str("$A2"));
-    expected = 2;
+    expected = 4;
     QCOMPARE(actual, expected);
     // check dependent
     actual = graph.getValue(*CellIndex::str("$A4"));
@@ -251,8 +250,8 @@ void SpreadsheetGraphTest::testGraphCondensationSimple()
     };
     auto reverse = getReverse(forward);
     auto vertices = extractAllVertices(forward);
-    auto result = condensation.perform(vertices, forward, reverse);
-    verifyCondensation(result.components, {
+    auto actual = condensation.condensate(vertices, forward, reverse);
+    verifyCondensation(actual, {
                            {CellIndex(0, 1)},
                            {CellIndex(0, 2)},
                            {CellIndex(0, 3)},
@@ -271,12 +270,84 @@ void SpreadsheetGraphTest::testGraphCondensationSimple()
          }},
     };
     reverse = getReverse(forward);
-    result = condensation.perform(vertices, forward, reverse);
-    verifyCondensation(result.components, {
+    actual = condensation.condensate(vertices, forward, reverse);
+    verifyCondensation(actual, {
                            {CellIndex(0, 1)},
                            {CellIndex(0, 2), CellIndex(0, 3)},
                            {CellIndex(0, 4)},
                        });
+}
+
+void SpreadsheetGraphTest::testTopologicalSorting()
+{
+    GraphCondensation condensation;
+
+    SpreadsheetGraph::EdgeList forward = {
+        {CellIndex(0, 1), {
+             CellIndex(0, 2),
+             CellIndex(0, 3),
+         }},
+        {CellIndex(0, 2), {
+             CellIndex(0, 3),
+             CellIndex(0, 4),
+         }},
+        {CellIndex(0, 4), {
+             CellIndex(0, 5),
+         }},
+        {CellIndex(0, 6), {
+             CellIndex(0, 7),
+         }},
+    };
+    auto vertices = extractAllVertices(forward);
+    auto actual = condensation.topologicalSort(vertices, forward);
+    std::vector<CellIndex> expected = {
+        CellIndex(0, 6), CellIndex(0, 7),
+        CellIndex(0, 1), CellIndex(0, 2), CellIndex(0, 4), CellIndex(0, 5), CellIndex(0, 3),
+    };
+    QCOMPARE(actual, expected);
+}
+
+void SpreadsheetGraphTest::testIsDAG()
+{
+    GraphCondensation condensation;
+
+    SpreadsheetGraph::EdgeList forward = {
+        {CellIndex(0, 1), {
+             CellIndex(0, 2),
+         }},
+        {CellIndex(0, 2), {
+             CellIndex(0, 3),
+         }},
+        {CellIndex(0, 3), {
+             CellIndex(0, 2),
+             CellIndex(0, 4)
+         }},
+    };
+    auto reverse = getReverse(forward);
+    auto vertices = extractAllVertices(forward);
+    auto components = condensation.condensate(vertices, forward, reverse);
+    QVERIFY(!condensation.isDAG(components));
+
+    forward = {
+        {CellIndex(0, 1), {
+             CellIndex(0, 2),
+             CellIndex(0, 3),
+         }},
+        {CellIndex(0, 2), {
+             CellIndex(0, 3),
+             CellIndex(0, 4),
+         }},
+        {CellIndex(0, 4), {
+             CellIndex(0, 5),
+         }},
+        {CellIndex(0, 6), {
+             CellIndex(0, 7),
+         }},
+    };
+    reverse = getReverse(forward);
+    vertices = extractAllVertices(forward);
+    components = condensation.condensate(vertices, forward, reverse);
+    QVERIFY(condensation.isDAG(components));
 }
 
 std::string toString(const std::unordered_set<CellIndex> &v)

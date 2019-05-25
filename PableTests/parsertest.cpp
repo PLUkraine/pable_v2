@@ -2,11 +2,6 @@
 #include "parser.h"
 #include "testutils.h"
 
-QDebug operator<<(QDebug d, const CellIndex &v) {
-    d << v.row() << ";" << v.col();
-    return d;
-}
-
 
 void ParserTest::testAlphaToIndex()
 {

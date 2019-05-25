@@ -49,7 +49,7 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
         }
         else if (auto asOp = std::get_if<char>(&token)) {
             if (st.size() < 2)
-                return setCachedResult(std::nullopt);
+                return setError();
 
             int op2 = st.back();
             st.pop_back();
@@ -62,18 +62,23 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
                 st.push_back(op1-op2);
             }
             else {
-                return setCachedResult(std::nullopt);
+                return setError();
             }
         }
         else if (auto asCell = std::get_if<CellIndex>(&token)) {
             auto val = cellValues.getValue(*asCell);
             if (!val.has_value())
-                return setCachedResult(std::nullopt);
+                return setError();
             st.push_back(*val);
         }
     }
     auto answer = st.size() == 1 ? std::optional<int>(st.back()) : std::nullopt;
     return setCachedResult(answer);
+}
+
+std::optional<int> Expression::setError()
+{
+    return setCachedResult(std::nullopt);
 }
 
 bool Expression::wasEvaluated() const
