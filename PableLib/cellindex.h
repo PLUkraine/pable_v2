@@ -18,6 +18,7 @@ public:
     static int columnAlphaToIndex(const std::string &alpha);
     static std::string columnIndexToAlpha(int index);
     friend bool operator==(const CellIndex &a, const CellIndex &b);
+    friend bool operator!=(const CellIndex &a, const CellIndex &b);
     inline int row() const {return mRow;}
     inline int col() const {return mCol;}
     std::string toString() const;
@@ -25,6 +26,10 @@ public:
 inline bool operator==(const CellIndex &a, const CellIndex &b)
 {
     return a.mRow == b.mRow && a.mCol == b.mCol;
+}
+inline bool operator!=(const CellIndex &a, const CellIndex &b)
+{
+    return !(a==b);
 }
 template<>
 struct std::hash<CellIndex>

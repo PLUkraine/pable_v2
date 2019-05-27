@@ -23,13 +23,17 @@ void SpreadsheetGraph::updateExpression(const CellIndex &atIndex, const Expressi
 
 void SpreadsheetGraph::updateAll()
 {
-    auto isSetSingleton = [](const std::unordered_set<CellIndex> &comp) {
-        return comp.size() == 1;
+    auto isComponentGood = [this](const std::unordered_set<CellIndex> &comp) {
+        if (comp.size() != 1)
+            return false;
+        const auto &thisCell = *comp.begin();
+        auto depends = getExpression(thisCell).dependencies();
+        return depends.empty() || (depends.back() != thisCell);
     };
 
     GraphCondensation condensation;
     auto strongComponents = condensation.condensate(mAllVertices, mForward, mReverse);
-    auto compEnd = std::remove_if(strongComponents.begin(), strongComponents.end(), isSetSingleton);
+    auto compEnd = std::remove_if(strongComponents.begin(), strongComponents.end(), isComponentGood);
 
     // no cycles
     if (compEnd == strongComponents.begin())
