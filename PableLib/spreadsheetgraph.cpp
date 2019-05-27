@@ -49,7 +49,7 @@ void SpreadsheetGraph::updateAll()
         for (auto it = strongComponents.begin(); it != compEnd; ++it)
         {
             auto anyCycleVertex = *it->begin();
-            propagateErrorDfs(anyCycleVertex, used);
+            propagateErrorDfs(anyCycleVertex, used, Expression::Recursion);
         }
     }
 }
@@ -131,14 +131,14 @@ void SpreadsheetGraph::addEdgeEntryIfNotExists(const CellIndex &at)
     }
 }
 
-void SpreadsheetGraph::propagateErrorDfs(const CellIndex &at, UsedMap &used)
+void SpreadsheetGraph::propagateErrorDfs(const CellIndex &at, UsedMap &used, Expression::Error errorType)
 {
     used[at] = true;
-    mExpr.at(at).setError();
+    mExpr.at(at).setError(errorType);
     for (const auto &to : mReverse.at(at))
     {
         if (!used[to])
-            propagateErrorDfs(to, used);
+            propagateErrorDfs(to, used, errorType);
     }
 }
 

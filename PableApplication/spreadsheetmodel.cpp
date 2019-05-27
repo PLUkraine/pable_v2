@@ -28,8 +28,13 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
             return "";
 
         auto computationRes = mGraph.getValue(cell);
-        return computationRes.has_value() ? QString::number(*computationRes)
-                                          : ERROR_STR;
+        if (computationRes.has_value())
+            return QString::number(*computationRes);
+        else {
+            auto error = mGraph.getExpression(cell).error();
+            return QString::fromStdString(Expression::errorStr(*error));
+        }
+
     }
     else if (role == Qt::EditRole)
         return QString::fromStdString(mGraph.getExpression(cell).toString());

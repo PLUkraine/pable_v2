@@ -59,54 +59,75 @@ void ParserTest::testEvaluate()
     };
 
     Expression expr;
-    std::optional<int> actual = expr.evaluate(context);
+    expr.evaluate(context);
+    std::optional<int> actual = expr.result();
     std::optional<int> expected = 0;
     QCOMPARE(actual, expected);
 
     expr.setExpression({2, 3, '-', 6, 7, '+', '-'});
-    actual = expr.evaluate(context);
+    QVERIFY_EXCEPTION_THROWN(expr.result(), std::runtime_error);
+    QVERIFY_EXCEPTION_THROWN(expr.error(), std::runtime_error);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = -14;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::nullopt);
 
     expr.setExpression({4, 5, '+', 1, '-', *CellIndex::str("$BB3"), '+'});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = 18;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::nullopt);
 
     expr.setExpression({4});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = 4;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::nullopt);
 
     expr.setExpression({9, 2});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = std::nullopt;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::optional<Expression::Error>(Expression::BadExpression));
 
     expr.setExpression({});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = std::nullopt;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::optional<Expression::Error>(Expression::BadExpression));
 
     expr.setExpression({9, '+', '-'});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = std::nullopt;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::optional<Expression::Error>(Expression::BadExpression));
 
     expr.setExpression({9, 2, '$'});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = std::nullopt;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::optional<Expression::Error>(Expression::BadExpression));
 
     expr.setExpression({9, *CellIndex::str("$AA2"), '-'});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = std::nullopt;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::optional<Expression::Error>(Expression::BadExpression));
 
     expr.setExpression({9, 6, '-', '-'});
-    actual = expr.evaluate(context);
+    expr.evaluate(context);
+    actual = expr.result();
     expected = std::nullopt;
     QCOMPARE(actual, expected);
+    QCOMPARE(expr.error(), std::optional<Expression::Error>(Expression::BadExpression));
 }
 
 void ParserTest::testGetResult()
@@ -147,12 +168,15 @@ void ParserTest::testGetResult()
 
     // reval with different context
     context.map[*CellIndex::str("$BB3")] = -1;
-    actual = expr.evaluate(context);
-    expected = 7;
-    QCOMPARE(actual, expected);
+    expr.evaluate(context);
     actual = expr.result();
     expected = 7;
     QCOMPARE(actual, expected);
+    expr.evaluate(context);
+    actual = expr.result();
+    expected = 7;
+    QCOMPARE(actual, expected);
+    expr.evaluate(context);
     actual = expr.result();
     expected = 7;
     QCOMPARE(actual, expected);

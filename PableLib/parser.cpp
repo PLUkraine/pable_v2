@@ -36,11 +36,11 @@ void Expression::setExpression(const std::vector<Token> &rpn)
 {
     mRpn = rpn;
     mStr = toString(rpn);
-    mResult = std::nullopt;
+    mResult = BadExpression;
     mWasEvaluated = false;
 }
 
-std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
+void Expression::evaluate(const ExpressionContext &cellValues)
 {
     std::vector<int> st;
     for (const auto &token : mRpn) {
@@ -49,7 +49,7 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
         }
         else if (auto asOp = std::get_if<char>(&token)) {
             if (st.size() < 2)
-                return setError();
+                return setError(BadExpression);
 
             int op2 = st.back();
             st.pop_back();
@@ -62,23 +62,23 @@ std::optional<int> Expression::evaluate(const ExpressionContext &cellValues)
                 st.push_back(op1-op2);
             }
             else {
-                return setError();
+                return setError(BadExpression);
             }
         }
         else if (auto asCell = std::get_if<CellIndex>(&token)) {
             auto val = cellValues.getValue(*asCell);
             if (!val.has_value())
-                return setError();
+                return setError(BadExpression);
             st.push_back(*val);
         }
     }
-    auto answer = st.size() == 1 ? std::optional<int>(st.back()) : std::nullopt;
-    return setCachedResult(answer);
+    st.size() == 1 ? setCachedResult(st.back()) : setError(BadExpression);
 }
 
-std::optional<int> Expression::setError()
+void Expression::setError(Error type)
 {
-    return setCachedResult(std::nullopt);
+    mWasEvaluated = true;
+    mResult = type;
 }
 
 bool Expression::wasEvaluated() const
@@ -89,7 +89,30 @@ bool Expression::wasEvaluated() const
 std::optional<int> Expression::result() const
 {
     if (!mWasEvaluated) throw std::runtime_error("Trying to get result of unevaluated expression");
-    return mResult;
+    if (auto asInt = std::get_if<int>(&mResult)) {
+        return *asInt;
+    }
+    else if (auto asError = std::get_if<Error>(&mResult)) {
+        return std::nullopt;
+    }
+    throw std::runtime_error("wrong variant value");
+}
+
+std::optional<Expression::Error> Expression::error() const
+{
+    if (!mWasEvaluated) throw std::runtime_error("Trying to get result of unevaluated expression");
+    if (auto asInt = std::get_if<int>(&mResult)) {
+        return std::nullopt;
+    }
+    else if (auto asError = std::get_if<Error>(&mResult)) {
+        return *asError;
+    }
+    throw std::runtime_error("wrong variant value");
+}
+
+std::string Expression::errorStr(Error errorType)
+{
+    return errorType == BadExpression ? "Bad Expression" : "Recursion";
 }
 
 std::vector<CellIndex> Expression::dependencies() const
@@ -108,10 +131,10 @@ std::string Expression::toString() const
     return mStr;
 }
 
-std::optional<int> Expression::setCachedResult(std::optional<int> value)
+void Expression::setCachedResult(int value)
 {
     mWasEvaluated = true;
-    return mResult = value;
+    mResult = value;
 }
 
 void swap(Expression &first, Expression &second)

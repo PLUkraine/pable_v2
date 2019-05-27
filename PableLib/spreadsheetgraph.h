@@ -34,7 +34,7 @@ private:
     void purgeCellDependencies(const CellIndex &at);
     void addEdgeEntryIfNotExists(const CellIndex &at);
 
-    void propagateErrorDfs(const CellIndex &at, UsedMap &used);
+    void propagateErrorDfs(const CellIndex &at, UsedMap &used, Expression::Error errorType);
 };
 
 class GraphCondensation

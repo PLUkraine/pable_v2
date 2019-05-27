@@ -19,15 +19,23 @@ public:
 
 class Expression
 {
+public:
+    enum Error
+    {
+        Recursion, BadExpression
+    };
+    using Result = std::variant<int, Error>;
 private:
     std::string mStr;
     std::vector<Token> mRpn;
-    std::optional<int> mResult;
+    Result mResult;
     bool mWasEvaluated;
+
 public:
     friend void swap(Expression& first, Expression& second);
     friend bool operator==(const Expression& first, const Expression& second);
 
+    static std::string errorStr(Error errorType);
     static std::string toString(const std::vector<Token> &tokens);
 
     static Expression fromNumber(int number);
@@ -38,14 +46,15 @@ public:
     Expression &operator=(Expression o);
 
     void setExpression(const std::vector<Token> &rpn);
-    std::optional<int> evaluate(const ExpressionContext &cellValues);
-    std::optional<int> setError();
+    void evaluate(const ExpressionContext &cellValues);
+    void setError(Error type);
 
     bool wasEvaluated() const;
     std::optional<int> result() const;
+    std::optional<Error> error() const;
     std::vector<CellIndex> dependencies() const;
     std::string toString() const;
 private:
-    std::optional<int> setCachedResult(std::optional<int> value);
+    void setCachedResult(int value);
 };
 
