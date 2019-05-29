@@ -189,6 +189,41 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     QCOMPARE(actual, expected);
 }
 
+void SpreadsheetGraphTest::testHasCell()
+{
+    SpreadsheetGraph graph;
+    QVERIFY(!graph.hasCell(CellIndex(0, 0)));
+    QCOMPARE(graph.getValue(CellIndex(0, 0)), 0);
+    QVERIFY(!graph.hasCell(CellIndex(0, 0)));
+
+    graph.setExpressionWithoutUpdate(CellIndex(0,0), Expression::fromNumber(1));
+    QVERIFY(graph.hasCell(CellIndex(0,0)));
+
+    // set invalid expression
+    QVERIFY(!graph.hasCell(CellIndex(0,1)));
+    QVERIFY(!graph.hasCell(CellIndex(0,2)));
+    QVERIFY(!graph.hasCell(CellIndex(0,3)));
+    graph.setExpressionWithoutUpdate(CellIndex(0,1),
+                                     Expression::fromTokens({
+                                                                CellIndex(0,2),
+                                                                CellIndex(0,3),
+                                                            }));
+    QVERIFY(graph.hasCell(CellIndex(0,1)));
+    QVERIFY(graph.hasCell(CellIndex(0,2)));
+    QVERIFY(graph.hasCell(CellIndex(0,3)));
+
+    // set valid expression
+    graph.setExpressionWithoutUpdate(CellIndex(0,4),
+                                     Expression::fromTokens({
+                                                                CellIndex(0,5),
+                                                                CellIndex(0,6),
+                                                                '+'
+                                                            }));
+    QVERIFY(graph.hasCell(CellIndex(0,4)));
+    QVERIFY(graph.hasCell(CellIndex(0,5)));
+    QVERIFY(graph.hasCell(CellIndex(0,6)));
+}
+
 void SpreadsheetGraphTest::testGetReverse()
 {
     SpreadsheetGraph::EdgeList forward = {

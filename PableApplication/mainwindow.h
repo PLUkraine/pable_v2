@@ -16,6 +16,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void setLineEditTextFromModel(const QModelIndex &i);
+    void setModelCellFromLineEdit(const QModelIndex &i);
 private:
     Ui::MainWindow *mUi;
 

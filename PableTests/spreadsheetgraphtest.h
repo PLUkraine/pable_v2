@@ -20,6 +20,7 @@ private Q_SLOTS:
     void testSetExpressionWithoutUpdateSimple();
     void testUpdateExpressionSimple();
     void testUpdateExpressionWithDependencies();
+    void testHasCell();
 
     void testGetReverse();
     void testGraphCondensationSimple();

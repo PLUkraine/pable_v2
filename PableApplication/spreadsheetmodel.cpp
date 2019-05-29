@@ -60,6 +60,7 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
         auto tokens = tokenizer.tokenize(value.toString().toStdString());
         mGraph.updateExpression(cell, Expression::fromTokens(tokens));
 
+        emit dataChanged(index, index);
         return true;
     }
     return false;
@@ -82,5 +83,5 @@ QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, 
 
 Qt::ItemFlags SpreadsheetModel::flags(const QModelIndex &index) const
 {
-    return Qt::ItemIsEditable | QAbstractTableModel::flags(index);
+    return QAbstractTableModel::flags(index);
 }
