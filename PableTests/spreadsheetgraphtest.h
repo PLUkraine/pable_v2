@@ -21,6 +21,7 @@ private Q_SLOTS:
     void testUpdateExpressionSimple();
     void testUpdateExpressionWithDependencies();
     void testHasCell();
+    void testClear();
 
     void testGetReverse();
     void testGraphCondensationSimple();

@@ -224,6 +224,42 @@ void SpreadsheetGraphTest::testHasCell()
     QVERIFY(graph.hasCell(CellIndex(0,6)));
 }
 
+void SpreadsheetGraphTest::testClear()
+{
+    SpreadsheetGraph graph;
+    QVERIFY(!graph.hasCell(CellIndex(0,0)));
+    graph.clear(CellIndex(0, 0));
+    QVERIFY(!graph.hasCell(CellIndex(0,0)));
+
+    graph.setExpressionWithoutUpdate(CellIndex(0,0), Expression::fromNumber(0));
+    QVERIFY(graph.hasCell(CellIndex(0,0)));
+    graph.clear(CellIndex(0,0));
+    QVERIFY(!graph.hasCell(CellIndex(0,0)));
+
+    graph.setExpressionWithoutUpdate(CellIndex(0,0),
+                                     Expression::fromTokens({
+                                                                CellIndex(0,5),
+                                                                CellIndex(0,6),
+                                                                '+'
+                                                            }));
+    // dependency must not be cleared
+    QVERIFY(graph.hasCell(CellIndex(0,5)));
+    graph.clear(CellIndex(0,5));
+    QVERIFY(graph.hasCell(CellIndex(0,5)));
+
+    QVERIFY(graph.hasCell(CellIndex(0,6)));
+    graph.clear(CellIndex(0,6));
+    QVERIFY(graph.hasCell(CellIndex(0,6)));
+
+    // leafs must not be cleared
+    QVERIFY(graph.hasCell(CellIndex(0,0)));
+    graph.clear(CellIndex(0,0));
+    QVERIFY(!graph.hasCell(CellIndex(0,0)));
+    QVERIFY(graph.hasCell(CellIndex(0,5)));
+    QVERIFY(graph.hasCell(CellIndex(0,6)));
+
+}
+
 void SpreadsheetGraphTest::testGetReverse()
 {
     SpreadsheetGraph::EdgeList forward = {
