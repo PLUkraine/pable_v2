@@ -16,4 +16,5 @@ private Q_SLOTS:
     void testToString();
 
     void testTokenizer();
+    void testParser();
 };

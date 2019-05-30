@@ -267,3 +267,57 @@ void ParserTest::testTokenizer()
     expected = {};
     QCOMPARE(actual, expected);
 }
+
+void ParserTest::testParser()
+{
+    ShuntingYardParser parser;
+
+    auto actual = parser.convertToRpn({0});
+    std::vector<Token> expected = {0};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({1, '+', 2});
+    expected = {1, 2, '+'};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({-3, '-', 2, '+', 12});
+    expected = {-3, 2, '-', 12, '+'};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({-3, '-', '(', 2, '+', 12, ')'});
+    expected = {-3, 2, 12, '+', '-'};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({4, '-', '(', 2, '-', '(', 5, '+', 6, '+', 1, ')', '+', -1, ')'});
+//        qDebug() << QString::fromStdString(Expression::toString(actual));
+    expected = {4, 2, 5, 6, '+', 1, '+', '-', -1, '+', '-'};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({'(', 2, ')', '+', 10});
+    expected = {2, 10, '+'};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({'(', 2, '+', 4, ')', '+', 10});
+    expected = {2, 4, '+', 10, '+'};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({'(', 2});
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({2, ')'});
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({2, '('});
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({')', 2});
+    expected = {};
+    QCOMPARE(actual, expected);
+
+    actual = parser.convertToRpn({'(', 2, '+', '(', 5, '-', 6, ')'});
+    expected = {};
+    QCOMPARE(actual, expected);
+}

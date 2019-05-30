@@ -6,6 +6,10 @@
 #include "expressioncontext.h"
 
 using Token = std::variant<int, char, CellIndex>;
+extern const char PLUS;
+extern const char MINUS;
+extern const char LBRACE;
+extern const char RBRACE;
 
 class Tokenizer
 {
@@ -15,6 +19,12 @@ public:
     bool isNumber(const std::string &str) const;
     bool isCellIndex(const std::string &str) const;
     bool isOperator(const std::string &str) const;
+};
+
+class ShuntingYardParser
+{
+public:
+    std::vector<Token> convertToRpn(const std::vector<Token> &tokens) const;
 };
 
 class Expression

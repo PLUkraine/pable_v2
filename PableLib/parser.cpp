@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <QDebug>
 
+const char PLUS = '+';
+const char MINUS = '-';
+const char LBRACE = '(';
+const char RBRACE = ')';
+
 Expression::Expression()
 {
     mRpn.emplace_back(0);
@@ -224,4 +229,59 @@ bool Tokenizer::isCellIndex(const std::string &str) const
 bool Tokenizer::isOperator(const std::string &str) const
 {
     return str.length() == 1 && (str[0] == '+' || str[0] == '-');
+}
+
+std::vector<Token> ShuntingYardParser::convertToRpn(const std::vector<Token> &tokens) const
+{
+    std::vector<Token> result;
+    std::vector<char> opStack;
+    for (const auto &token : tokens)
+    {
+        if (auto asInt = std::get_if<int>(&token)) {
+            result.push_back(token);
+        }
+        else if (auto asCell = std::get_if<CellIndex>(&token)) {
+            result.push_back(token);
+        }
+        else if (auto asOp = std::get_if<char>(&token)) {
+            if (*asOp == LBRACE) {
+                opStack.push_back(*asOp);
+            }
+            else if (*asOp == RBRACE) {
+                for(;;) {
+                    if (opStack.empty())
+                        return {};
+
+                    if (opStack.back() != LBRACE) {
+                        result.emplace_back(opStack.back());
+                        opStack.pop_back();
+                    }
+                    else {
+                        opStack.pop_back();
+                        break;
+                    }
+                }
+            }
+            else {
+                while (!opStack.empty() && opStack.back() != LBRACE) {
+                    result.emplace_back(opStack.back());
+                    opStack.pop_back();
+                }
+                opStack.push_back(*asOp);
+
+                continue;
+            }
+        }
+        else throw std::runtime_error("Cannot cast token to any variant");
+    }
+
+    while (!opStack.empty()) {
+        if (opStack.back() == LBRACE)
+            return {};
+
+        result.emplace_back(opStack.back());
+        opStack.pop_back();
+    }
+
+    return result;
 }
