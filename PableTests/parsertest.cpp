@@ -243,12 +243,20 @@ void ParserTest::testTokenizer()
     expected = {-4, 5, '-'};
     QCOMPARE(actual, expected);
 
+    actual = tokenizer.tokenize("( -4 +5 ) -");
+    expected = {'(', -4, 5, ')', '-'};
+    QCOMPARE(actual, expected);
+
     actual = tokenizer.tokenize("-4 +5 $A1 -");
     expected = {-4, 5, *CellIndex::str("$A1"), '-',};
     QCOMPARE(actual, expected);
 
     actual = tokenizer.tokenize("+ -100002 - $BBAS1213");
     expected = {'+', -100002, '-', *CellIndex::str("$BBAS1213")};
+    QCOMPARE(actual, expected);
+
+    actual = tokenizer.tokenize(") ( + -100002 ) - $BBAS1213");
+    expected = {')', '(', '+', -100002, ')', '-', *CellIndex::str("$BBAS1213")};
     QCOMPARE(actual, expected);
 
     actual = tokenizer.tokenize("$ B 12 ");

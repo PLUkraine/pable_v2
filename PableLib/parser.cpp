@@ -60,10 +60,10 @@ void Expression::evaluate(const ExpressionContext &cellValues)
             st.pop_back();
             int op1 = st.back();
             st.pop_back();
-            if (*asOp == '+') {
+            if (*asOp == PLUS) {
                 st.push_back(op1+op2);
             }
-            else if (*asOp == '-') {
+            else if (*asOp == MINUS) {
                 st.push_back(op1-op2);
             }
             else {
@@ -217,7 +217,7 @@ bool Tokenizer::isNumber(const std::string &str) const
     // allow minus or plus on start
     if (str.empty()) return false;
     auto st = str.cbegin();
-    if (str[0] == '-' || str[0] == '+') st++;
+    if (str[0] == MINUS || str[0] == PLUS) st++;
     return std::all_of(st, str.cend(), isdigit);
 }
 
@@ -228,7 +228,8 @@ bool Tokenizer::isCellIndex(const std::string &str) const
 
 bool Tokenizer::isOperator(const std::string &str) const
 {
-    return str.length() == 1 && (str[0] == '+' || str[0] == '-');
+    return str.length() == 1 && (str[0] == PLUS || str[0] == MINUS ||
+            str[0] == '(' || str[0] == ')');
 }
 
 std::vector<Token> ShuntingYardParser::convertToRpn(const std::vector<Token> &tokens) const
