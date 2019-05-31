@@ -1,8 +1,18 @@
 #pragma once
 
 #include <QAbstractTableModel>
-#include "unordered_map"
+#include <unordered_map>
 #include "spreadsheetgraph.h"
+
+class CellStringMapping
+{
+public:
+    QString rawString(const CellIndex &at) const;
+    void setRawString(const CellIndex &at, const QString &value);
+
+private:
+    std::unordered_map<CellIndex, QString> mStrings;
+};
 
 class SpreadsheetModel : public QAbstractTableModel
 {
@@ -18,4 +28,5 @@ public:
 
 private:
     SpreadsheetGraph mGraph;
+    CellStringMapping mStrings;
 };

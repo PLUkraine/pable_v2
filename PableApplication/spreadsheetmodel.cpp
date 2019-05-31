@@ -37,7 +37,7 @@ QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
 
     }
     else if (role == Qt::EditRole)
-        return QString::fromStdString(mGraph.getExpression(cell).toString());
+        return mStrings.rawString(cell);
 
     return QVariant();
 }
@@ -49,18 +49,20 @@ bool SpreadsheetModel::setData(const QModelIndex &index, const QVariant &value, 
     if (role == Qt::EditRole)
     {
         CellIndex cell(index.row(), index.column());
+        mStrings.setRawString(cell, value.toString());
         if (value.toString().isEmpty()) {
             mGraph.clear(cell);
             return true;
         }
 
         Tokenizer tokenizer;
-        Expression expr;
+        ShuntingYardParser parser;
 
         auto tokens = tokenizer.tokenize(value.toString().toStdString());
-        mGraph.updateExpression(cell, Expression::fromTokens(tokens));
+        auto parserTokens = parser.convertToRpn(tokens);
+        mGraph.updateExpression(cell, Expression::fromTokens(parserTokens));
 
-        emit dataChanged(index, index);
+        emit dataChanged(createIndex(0, 0), createIndex(rowCount()-1, columnCount()-1));
         return true;
     }
     return false;
@@ -84,4 +86,18 @@ QVariant SpreadsheetModel::headerData(int section, Qt::Orientation orientation, 
 Qt::ItemFlags SpreadsheetModel::flags(const QModelIndex &index) const
 {
     return QAbstractTableModel::flags(index);
+}
+
+QString CellStringMapping::rawString(const CellIndex &at) const
+{
+    auto it = mStrings.find(at);
+    if (it != mStrings.end())
+        return it->second;
+
+    return "";
+}
+
+void CellStringMapping::setRawString(const CellIndex &at, const QString &value)
+{
+    mStrings[at] = value;
 }
