@@ -18,7 +18,6 @@ private:
     EdgeList mReverse;
 
 public:
-    SpreadsheetGraph();
     void setExpressionWithoutUpdate(const CellIndex &at, const Expression &expression);
     void updateExpression(const CellIndex &atIndex, const Expression &expression);
 

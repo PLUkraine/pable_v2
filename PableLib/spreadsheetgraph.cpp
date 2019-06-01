@@ -1,10 +1,5 @@
 #include "spreadsheetgraph.h"
 
-SpreadsheetGraph::SpreadsheetGraph()
-{
-
-}
-
 void SpreadsheetGraph::setExpressionWithoutUpdate(const CellIndex &at, const Expression &expression)
 {
     auto it = mExpr.find(at);
@@ -33,28 +28,27 @@ void SpreadsheetGraph::updateAll()
 
     GraphCondensation condensation;
     auto strongComponents = condensation.condensate(mAllVertices, mForward, mReverse);
+    // filter components that contain cycles
     auto compEnd = std::remove_if(strongComponents.begin(), strongComponents.end(), isComponentGood);
 
-    // no cycles
-    if (compEnd == strongComponents.begin())
-    {
-        // get global sort order and reevaluate ENTIRE graph
-        auto order = condensation.topologicalSort(mAllVertices, mForward);
-        for (auto it = order.rbegin(); it != order.rend(); ++it)
-        {
-            mExpr.at(*it).evaluate(*this);
-        }
-    }
+    UsedMap used;
     // there are cycles!
-    else
+    if (compEnd != strongComponents.begin())
     {
         // propagate error using reverse graph
-        UsedMap used;
         for (auto it = strongComponents.begin(); it != compEnd; ++it)
         {
             auto anyCycleVertex = *it->begin();
             propagateErrorDfs(anyCycleVertex, used, Expression::Recursion);
         }
+    }
+
+    // update remaining 'good' vertices
+    auto order = condensation.topologicalSort(mAllVertices, mForward);
+    for (auto it = order.rbegin(); it != order.rend(); ++it)
+    {
+        if (!used[*it])
+            mExpr.at(*it).evaluate(*this);
     }
 }
 

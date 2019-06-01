@@ -19,8 +19,6 @@ int SpreadsheetModel::columnCount(const QModelIndex &) const
 
 QVariant SpreadsheetModel::data(const QModelIndex &index, int role) const
 {
-    static QString ERROR_STR = "ERROR";
-
     CellIndex cell(index.row(), index.column());
     if (role == Qt::DisplayRole)
     {

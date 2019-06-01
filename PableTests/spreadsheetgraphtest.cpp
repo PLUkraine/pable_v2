@@ -189,6 +189,25 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     QCOMPARE(actual, expected);
 }
 
+void SpreadsheetGraphTest::testUpdateWithRecursion()
+{
+    SpreadsheetGraph graph;
+
+    graph.updateExpression(CellIndex(0,0), Expression::fromTokens({
+                                                                      CellIndex(0,1),
+                                                                  }));
+    graph.updateExpression(CellIndex(0,1), Expression::fromTokens({
+                                                                      CellIndex(0,0),
+                                                                  }));
+    QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getValue(CellIndex(0,1)), std::nullopt);
+
+    graph.updateExpression(CellIndex(0,2), Expression::fromNumber(42));
+    QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getValue(CellIndex(0,1)), std::nullopt);
+    QCOMPARE(graph.getValue(CellIndex(0,2)), 42);
+}
+
 void SpreadsheetGraphTest::testHasCell()
 {
     SpreadsheetGraph graph;
