@@ -144,6 +144,7 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     auto actual = graph.getValue(*CellIndex::str("$A3"));
     std::optional<int> expected = -2;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A3")), std::nullopt);
 
     // dependent
     graph.updateExpression(*CellIndex::str("$A4"), Expression::fromTokens({
@@ -154,6 +155,7 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     actual = graph.getValue(*CellIndex::str("$A4"));
     expected = 8;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A4")), std::nullopt);
 
     graph.updateExpression(*CellIndex::str("$A5"), Expression::fromTokens({
                                                                               *CellIndex::str("$A3"),
@@ -163,6 +165,7 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     actual = graph.getValue(*CellIndex::str("$A5"));
     expected = -12;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A5")), std::nullopt);
 
     // update middle
     graph.updateExpression(*CellIndex::str("$A3"), Expression::fromTokens({
@@ -173,20 +176,31 @@ void SpreadsheetGraphTest::testUpdateExpressionWithDependencies()
     actual = graph.getValue(*CellIndex::str("$A3"));
     expected = 6;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A3")), std::nullopt);
+
+
     //check independent
     actual = graph.getValue(*CellIndex::str("$A1"));
     expected = 2;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A1")), std::nullopt);
+
     actual = graph.getValue(*CellIndex::str("$A2"));
     expected = 4;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A2")), std::nullopt);
+
+
     // check dependent
     actual = graph.getValue(*CellIndex::str("$A4"));
     expected = 16;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A4")), std::nullopt);
+
     actual = graph.getValue(*CellIndex::str("$A5"));
     expected = -4;
     QCOMPARE(actual, expected);
+    QCOMPARE(graph.getError(*CellIndex::str("$A5")), std::nullopt);
 }
 
 void SpreadsheetGraphTest::testUpdateWithRecursion()
@@ -200,12 +214,41 @@ void SpreadsheetGraphTest::testUpdateWithRecursion()
                                                                       CellIndex(0,0),
                                                                   }));
     QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,0)), Expression::Recursion);
     QCOMPARE(graph.getValue(CellIndex(0,1)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,1)), Expression::Recursion);
+
 
     graph.updateExpression(CellIndex(0,2), Expression::fromNumber(42));
     QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,0)), Expression::Recursion);
+
     QCOMPARE(graph.getValue(CellIndex(0,1)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,1)), Expression::Recursion);
+
     QCOMPARE(graph.getValue(CellIndex(0,2)), 42);
+    QCOMPARE(graph.getError(CellIndex(0,2)), std::nullopt);
+}
+
+void SpreadsheetGraphTest::testUpdateWithBadExpression()
+{
+    SpreadsheetGraph graph;
+    graph.updateExpression(CellIndex(0,0), Expression::fromTokens({4, 5}));
+    QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,0)), Expression::BadExpression);
+
+    graph.updateExpression(CellIndex(0,0), Expression::fromTokens({CellIndex(0,1), CellIndex(0,2), '+'}));
+    graph.updateExpression(CellIndex(0,1), Expression::fromTokens({'+'}));
+    graph.updateExpression(CellIndex(0,2), Expression::fromNumber(4));
+    QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,0)), Expression::BadExpression);
+
+    graph.updateExpression(CellIndex(0,4), Expression::fromTokens({CellIndex(0,0)}));
+    graph.updateExpression(CellIndex(0,0), Expression::fromTokens({CellIndex(0,1), CellIndex(0,2), '-'}));
+    QCOMPARE(graph.getValue(CellIndex(0,0)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,0)), Expression::BadExpression);
+    QCOMPARE(graph.getValue(CellIndex(0,4)), std::nullopt);
+    QCOMPARE(graph.getError(CellIndex(0,4)), Expression::BadExpression);
 }
 
 void SpreadsheetGraphTest::testHasCell()
@@ -395,49 +438,6 @@ void SpreadsheetGraphTest::testTopologicalSorting()
         CellIndex(0, 1), CellIndex(0, 2), CellIndex(0, 4), CellIndex(0, 5), CellIndex(0, 3),
     };
     QCOMPARE(actual, expected);
-}
-
-void SpreadsheetGraphTest::testIsDAG()
-{
-    GraphCondensation condensation;
-
-    SpreadsheetGraph::EdgeList forward = {
-        {CellIndex(0, 1), {
-             CellIndex(0, 2),
-         }},
-        {CellIndex(0, 2), {
-             CellIndex(0, 3),
-         }},
-        {CellIndex(0, 3), {
-             CellIndex(0, 2),
-             CellIndex(0, 4)
-         }},
-    };
-    auto reverse = getReverse(forward);
-    auto vertices = extractAllVertices(forward);
-    auto components = condensation.condensate(vertices, forward, reverse);
-    QVERIFY(!condensation.isDAG(components));
-
-    forward = {
-        {CellIndex(0, 1), {
-             CellIndex(0, 2),
-             CellIndex(0, 3),
-         }},
-        {CellIndex(0, 2), {
-             CellIndex(0, 3),
-             CellIndex(0, 4),
-         }},
-        {CellIndex(0, 4), {
-             CellIndex(0, 5),
-         }},
-        {CellIndex(0, 6), {
-             CellIndex(0, 7),
-         }},
-    };
-    reverse = getReverse(forward);
-    vertices = extractAllVertices(forward);
-    components = condensation.condensate(vertices, forward, reverse);
-    QVERIFY(condensation.isDAG(components));
 }
 
 std::string toString(const std::unordered_set<CellIndex> &v)

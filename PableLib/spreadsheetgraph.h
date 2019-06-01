@@ -25,6 +25,7 @@ public:
 
     const Expression &getExpression(const CellIndex &at) const;
     std::optional<int> getValue(const CellIndex &at) const;
+    std::optional<Expression::Error> getError(const CellIndex &at) const;
     bool hasCell(const CellIndex &at) const;
     void clear(const CellIndex &at);
 
@@ -52,7 +53,6 @@ public:
                               const SpreadsheetGraph::EdgeList &reverse);
     std::vector<CellIndex> topologicalSort(const SpreadsheetGraph::VertexSet &allVertices,
                                            const SpreadsheetGraph::EdgeList &edges);
-    bool isDAG(const ComponentsList &strongComponents) const;
 
 private:
     void dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order);

@@ -21,11 +21,11 @@ private Q_SLOTS:
     void testUpdateExpressionSimple();
     void testUpdateExpressionWithDependencies();
     void testUpdateWithRecursion();
+    void testUpdateWithBadExpression();
     void testHasCell();
     void testClear();
 
     void testGetReverse();
     void testGraphCondensationSimple();
     void testTopologicalSorting();
-    void testIsDAG();
 };

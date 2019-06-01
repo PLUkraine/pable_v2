@@ -1,4 +1,5 @@
 #include "spreadsheetgraph.h"
+#include <QDebug>
 
 void SpreadsheetGraph::setExpressionWithoutUpdate(const CellIndex &at, const Expression &expression)
 {
@@ -61,16 +62,26 @@ const Expression &SpreadsheetGraph::getExpression(const CellIndex &at) const
 
 std::optional<int> SpreadsheetGraph::getValue(const CellIndex &at) const
 {
-    auto it = mExpr.find(at);
-    if (it == mExpr.end()) {
-        return 0;
-    }
+    if (!hasCell(at)) return 0;
 
-    const Expression &expr = it->second;
-    if (!expr.wasEvaluated())
+    const Expression &expr = mExpr.at(at);
+    if (!expr.wasEvaluated()) {
+        qWarning() << QString::fromStdString(at.toString()) << "was not evaluated";
         return std::nullopt;
-
+    }
     return expr.result();
+}
+
+std::optional<Expression::Error> SpreadsheetGraph::getError(const CellIndex &at) const
+{
+    if (!hasCell(at)) return std::nullopt;
+
+    const Expression &expr = mExpr.at(at);
+    if (!expr.wasEvaluated()) {
+        qWarning() << QString::fromStdString(at.toString()) << "was not evaluated";
+        return std::nullopt;
+    }
+    return expr.error();
 }
 
 bool SpreadsheetGraph::hasCell(const CellIndex &at) const
@@ -186,13 +197,6 @@ std::vector<CellIndex> GraphCondensation::topologicalSort(const SpreadsheetGraph
 
     mForward = nullptr;
     return order;
-}
-
-bool GraphCondensation::isDAG(const GraphCondensation::ComponentsList &strongComponents) const
-{
-    return std::all_of(strongComponents.begin(), strongComponents.end(), [](const std::unordered_set<CellIndex> &s) {
-        return s.size() == 1;
-    });
 }
 
 void GraphCondensation::dfsTopologicalSort(const CellIndex &v, std::vector<CellIndex> &order)
