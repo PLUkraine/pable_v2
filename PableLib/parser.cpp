@@ -97,7 +97,7 @@ std::optional<int> Expression::result() const
     if (auto asInt = std::get_if<int>(&mResult)) {
         return *asInt;
     }
-    else if (auto asError = std::get_if<Error>(&mResult)) {
+    else if (std::get_if<Error>(&mResult)) {
         return std::nullopt;
     }
     throw std::runtime_error("wrong variant value");
@@ -106,7 +106,7 @@ std::optional<int> Expression::result() const
 std::optional<Expression::Error> Expression::error() const
 {
     if (!mWasEvaluated) throw std::runtime_error("Trying to get result of unevaluated expression");
-    if (auto asInt = std::get_if<int>(&mResult)) {
+    if (std::get_if<int>(&mResult)) {
         return std::nullopt;
     }
     else if (auto asError = std::get_if<Error>(&mResult)) {
@@ -238,10 +238,10 @@ std::vector<Token> ShuntingYardParser::convertToRpn(const std::vector<Token> &to
     std::vector<char> opStack;
     for (const auto &token : tokens)
     {
-        if (auto asInt = std::get_if<int>(&token)) {
+        if (std::get_if<int>(&token)) {
             result.push_back(token);
         }
-        else if (auto asCell = std::get_if<CellIndex>(&token)) {
+        else if (std::get_if<CellIndex>(&token)) {
             result.push_back(token);
         }
         else if (auto asOp = std::get_if<char>(&token)) {

@@ -1,5 +1,6 @@
 #include "cellindex.h"
 #include <sstream>
+#include <algorithm>
 
 std::optional<CellIndex> CellIndex::str(const std::string &cell)
 {
